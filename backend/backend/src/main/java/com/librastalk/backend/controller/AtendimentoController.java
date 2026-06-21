@@ -3,6 +3,8 @@ package com.librastalk.backend.controller;
 import com.librastalk.backend.model.Atendimento;
 import com.librastalk.backend.model.Guiche;
 import com.librastalk.backend.model.Usuario;
+import com.librastalk.backend.repository.GuicheRepository;
+import com.librastalk.backend.repository.UsuarioRepository;
 import com.librastalk.backend.service.AtendimentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import java.util.Map;
 public class AtendimentoController {
 
     private final AtendimentoService atendimentoService;
+    private final UsuarioRepository usuarioRepository;
+    private final GuicheRepository guicheRepository;
 
     /**
      * Endpoint para iniciar um atendimento (Relação Atendente + Tablet)
@@ -25,13 +29,19 @@ public class AtendimentoController {
     @PostMapping("/iniciar")
     public ResponseEntity<?> iniciar(@RequestBody Map<String, Object> dados) {
         try {
-            // ATENÇÃO: Para simplificar o payload do POST, fingimos receber objetos montados.
-            // Na integração real, o front passará os IDs e os services buscarão no banco.
-            Usuario usuario = (Usuario) dados.get("usuario");
-            Guiche guiche = (Guiche) dados.get("guiche");
+            // Extrai com segurança os IDs numéricos e o texto do JSON
+            Long usuarioId = ((Number) dados.get("usuarioId")).longValue();
+            Long guicheId = ((Number) dados.get("guicheId")).longValue();
             String tipoDeficiencia = (String) dados.get("tipoDeficiencia");
 
-            // Aciona o serviço que bloqueia duplicidades e cria o registro
+            // Busca as entidades completas no banco de dados
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado. ID: " + usuarioId));
+            
+            Guiche guiche = guicheRepository.findById(guicheId)
+                    .orElseThrow(() -> new RuntimeException("Guichê não encontrado. ID: " + guicheId));
+
+            // Aciona o serviço passando os objetos de modelo reais
             Atendimento atendimento = atendimentoService.iniciarAtendimento(usuario, guiche, tipoDeficiencia);
             
             return ResponseEntity.ok(atendimento);

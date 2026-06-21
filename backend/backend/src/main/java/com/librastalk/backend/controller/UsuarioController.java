@@ -1,0 +1,56 @@
+package com.librastalk.backend.controller;
+
+import com.librastalk.backend.model.Usuario;
+import com.librastalk.backend.model.Estabelecimento;
+import com.librastalk.backend.repository.EstabelecimentoRepository;
+import com.librastalk.backend.repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/usuarios")
+@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
+public class UsuarioController {
+
+    private final UsuarioRepository usuarioRepository;
+    private final EstabelecimentoRepository estabelecimentoRepository;
+
+    /**
+     * Endpoint para cadastrar um novo usuário (Atendente/Intérprete)
+     * URL: POST http://localhost:8080/api/usuarios/cadastrar
+     */
+    @PostMapping("/cadastrar")
+    public ResponseEntity<?> cadastrar(@RequestBody Map<String, Object> dados) {
+        try {
+            // 1. Validar se o e-mail já existe para evitar duplicidade
+            String email = (String) dados.get("email");
+            if (usuarioRepository.findByEmail(email).isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "Este e-mail já está cadastrado."));
+            }
+
+            // 2. Buscar o estabelecimento pelo ID enviado no JSON
+            Long estabelecimentoId = ((Number) dados.get("estabelecimentoId")).longValue();
+            Estabelecimento est = estabelecimentoRepository.findById(estabelecimentoId)
+                    .orElseThrow(() -> new RuntimeException("Estabelecimento não encontrado. ID: " + estabelecimentoId));
+
+            // 3. Montar o novo usuário
+            Usuario novoUsuario = new Usuario();
+            novoUsuario.setNome((String) dados.get("nome"));
+            novoUsuario.setEmail(email);
+            novoUsuario.setSenha((String) dados.get("senha")); // Futuramente aqui entrará o BCrypt para criptografia
+            novoUsuario.setPerfil(com.librastalk.backend.model.Perfil.valueOf((String) dados.get("perfil")));
+            novoUsuario.setEstabelecimento(est);
+
+            // 4. Salvar no banco
+            Usuario salvo = usuarioRepository.save(novoUsuario);
+
+            return ResponseEntity.ok(salvo);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
+}
