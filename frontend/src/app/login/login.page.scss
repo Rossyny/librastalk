@@ -1,19 +1,162 @@
-ion-content {
-  --background: #0f172a; // Slate-900 para fundo escuro sofisticado
-}
+$bg-gradient: linear-gradient(135deg, #f8fafd 0%, #eef3f9 100%);
+$card-bg: #ffffff;
+$primary-color: #4f46e5; // Índigo moderno
+$primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+$text-main: #1e293b;
+$text-muted: #64748b;
+$input-bg: #f1f5f9;
+$shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+$shadow-lg: 0 10px 25px -5px rgba(79, 70, 229, 0.1), 0 8px 10px -6px rgba(79, 70, 229, 0.1);
 
-.custom-dark-item {
-  --background: #020617; // Slate-950
-  --color: #ffffff;
-  --border-color: #1e293b;
-  --border-radius: 12px;
-  
-  ion-label {
-    color: #94a3b8 !important;
+.login-content {
+  --background: #{$bg-gradient};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .login-container {
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+    max-width: 450px;
+    margin: 0 auto;
   }
 }
 
-.animate-shake {
+// Botão Flutuante de Voltar no Topo
+.back-btn {
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  align-self: flex-start;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover {
+    color: $primary-color;
+    
+    ion-icon {
+      transform: translateX(-3px);
+    }
+  }
+}
+
+// Cabeçalho e Logo
+.header-section {
+  text-align: center;
+  margin-bottom: 2.5rem;
+
+  .logo-placeholder {
+    width: 64px;
+    height: 64px;
+    background: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: $shadow-sm;
+
+    .logo-icon {
+      font-size: 32px;
+      color: $primary-color;
+    }
+  }
+
+  h2 {
+    color: $text-main;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    color: $text-muted;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+}
+
+// Formulário e Inputs Customizados
+.login-form {
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .custom-input {
+    --background: #{$card-bg}; // Muda para fundo branco para destacar a borda
+    --border-radius: 14px;
+    --padding-start: 1rem;
+    --inner-padding-end: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    
+    // Adiciona uma borda cinza clara padrão
+    border: 1.5px solid #e2e8f0; 
+    transition: all 0.3s ease; // Transição suave para quando clicar
+
+    // Efeito quando a caixa recebe o clique/foco (Focus)
+    &.ion-focused {
+      border-color: $primary-color; // A borda ganha a cor principal (índigo)
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); // Um efeito de brilho suave ao redor
+    }
+    
+    ion-icon {
+      color: $text-muted;
+      margin-right: 10px;
+      font-size: 20px;
+      transition: color 0.3s ease;
+    }
+
+    // Se quiser que o ícone também mude de cor no foco
+    &.ion-focused ion-icon {
+      color: $primary-color;
+    }
+
+    ion-input {
+      --color: #{$text-main};
+      --placeholder-color: #{$text-muted};
+      --placeholder-opacity: 0.6;
+    }
+  }
+}
+
+// Feedback de Carregamento e Erros
+ion-progress-bar {
+  margin-top: 1rem;
+  --background: #e2e8f0;
+  --progress-background: #{$primary-color};
+  border-radius: 9999px;
+  height: 4px;
+}
+
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 1rem;
   animation: shake 0.3s ease-in-out;
 }
 
@@ -21,4 +164,105 @@ ion-content {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
+}
+
+// Links e Esqueceu a Senha
+.forgot-password {
+  text-align: right;
+  margin: 1.25rem 0 2rem 0;
+
+  a {
+    color: $primary-color;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    
+    &:hover, &:active {
+      opacity: 0.8;
+    }
+  }
+}
+
+// Botão Principal (Entrar)
+.main-button {
+  --background: #{$primary-gradient};
+  --box-shadow: #{$shadow-lg};
+  --border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  height: 52px;
+  margin: 0;
+}
+
+// Divisor de seção
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0;
+  color: $text-muted;
+  font-size: 0.85rem;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  span {
+    padding: 0 10px;
+  }
+}
+
+// Botões Sociais
+.social-login {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+
+  .social-btn {
+    flex: 1;
+    height: 50px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: $shadow-sm;
+    transition: transform 0.2s ease, background 0.2s ease;
+
+    ion-icon {
+      font-size: 22px;
+      color: $text-main;
+    }
+
+    &:active {
+      transform: scale(0.98);
+      background: #f8fafc;
+    }
+  }
+}
+
+// Rodapé / Registro
+.footer-section {
+  text-align: center;
+  
+  p {
+    color: $text-muted;
+    font-size: 0.9rem;
+    margin: 0;
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-weight: 600;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }

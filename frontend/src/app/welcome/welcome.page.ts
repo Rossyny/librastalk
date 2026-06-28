@@ -6,6 +6,8 @@ import {
   IonCardHeader, IonCardTitle, IonCardContent, 
   IonButton, IonText, IonIcon 
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { briefcaseOutline, headsetOutline, tabletPortraitOutline, sparklesOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-welcome',
@@ -20,27 +22,28 @@ import {
 })
 export class WelcomePage {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    // Trocamos micOutline por headsetOutline (combina muito mais com Atendente!)
+    addIcons({ 
+      briefcaseOutline, 
+      headsetOutline, 
+      tabletPortraitOutline, 
+      sparklesOutline 
+    });
+  }
 
-  /**
-   * Navega para o painel administrativo do Gerente
-   */
   irParaGerente() {
     this.router.navigate(['/login']);
   }
 
   /**
-   * Navega para a tela de autenticação unificada antes de ir para o dashboard
+   * Navega para a tela de login do Atendente corporativo
    */
-  irParaInterprete() {
+  irParaAtendente() {
     this.router.navigate(['/login']);
   }
 
-  /**
-   * Navega para a tela de ativação do tablet do Guichê físico
-   */
   irParaTablet() {
-    // Rota que criaremos a seguir
-    this.router.navigate(['/ativar-tablet']);
+    this.router.navigate(['/login']);
   }
 }

@@ -1,0 +1,329 @@
+$bg-gradient: linear-gradient(135deg, #f8fafd 0%, #eef3f9 100%);
+$card-bg: #ffffff;
+$text-main: #1e293b;
+$text-muted: #64748b;
+$shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+$shadow-lg: 0 10px 25px -5px rgba(30, 41, 59, 0.04);
+$primary-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); // Roxo do Atendente
+
+.dashboard-content {
+  --background: #{$bg-gradient};
+
+  .dashboard-container {
+    padding: 2rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100%;
+  }
+}
+
+// Menu de Topo (Topbar)
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 20px;
+  box-shadow: $shadow-sm;
+  border: 1px solid #e2e8f0;
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .avatar-box {
+      width: 44px;
+      height: 44px;
+      background: #f3e8ff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7c3aed;
+      font-size: 20px;
+    }
+
+    .user-info {
+      h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: $text-main;
+      }
+      p {
+        margin: 0;
+        font-size: 0.82rem;
+        color: $text-muted;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff5f5;
+    border: 1px solid #fee2e2;
+    padding: 8px 16px;
+    border-radius: 12px;
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:active {
+      background: #fde8e8;
+    }
+  }
+}
+
+// Card de Status à Esquerda
+.status-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: $shadow-sm;
+  border: 1px solid #f1f5f9;
+  margin: 12px 12px 12px 0;
+
+  ion-card-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+
+    .icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 1rem;
+
+      &.online { background: #d1fae5; color: #10b981; }
+      &.offline { background: #f1f5f9; color: #64748b; }
+    }
+
+    ion-card-title {
+      color: $text-main;
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: $text-muted;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .description-text {
+    color: $text-muted;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .toggle-container {
+    margin-top: 1.5rem;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e2e8f0;
+
+    .status-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      
+      &.text-online { color: #10b981; }
+      &.text-offline { color: #64748b; }
+    }
+  }
+}
+
+// Central de Chamados à Direita
+.central-chamados {
+  margin-top: 12px;
+
+  .section-title {
+    h2 {
+      margin: 0 0 4px 0;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: $text-main;
+    }
+    p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: $text-muted;
+      font-weight: 500;
+    }
+  }
+
+  // Estado Vazio (Sem chamados)
+  .empty-state {
+    background: white;
+    border-radius: 20px;
+    border: 1px dashed #cbd5e1;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: $shadow-lg;
+
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 1rem;
+    }
+
+    h4 {
+      margin: 0 0 6px 0;
+      font-weight: 700;
+      color: $text-main;
+      font-size: 1.05rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: $text-muted;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+  }
+
+  // Cards Individuais da Fila de Chamados
+  .chamado-item-card {
+    background: white;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 1.25rem;
+    box-shadow: $shadow-sm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+
+    &:hover {
+      border-color: #cbd5e1;
+    }
+
+    .chamado-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .guiche-badge {
+        background: #f3e8ff;
+        border: 1px solid #e9d5ff;
+        border-radius: 12px;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .label {
+          font-size: 0.6rem;
+          font-weight: 800;
+          color: #7c3aed;
+        }
+        .number {
+          font-size: 1.4rem;
+          font-weight: 900;
+          color: #7c3aed;
+          line-height: 1.1;
+        }
+      }
+
+      .chamado-details {
+        h4 {
+          margin: 0 0 2px 0;
+          font-size: 1rem;
+          font-weight: 700;
+          color: $text-main;
+        }
+        p {
+          margin: 0;
+          font-size: 0.82rem;
+          color: $text-muted;
+          font-weight: 500;
+
+          .wait-time {
+            color: #ef4444;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+
+    .action-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+
+      .tech-badges {
+        display: flex;
+        gap: 6px;
+
+        ion-badge {
+          --background: #f1f5f9;
+          --color: #475569;
+          font-size: 0.68rem;
+          font-weight: 700;
+          padding: 4px 8px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 3px;
+        }
+      }
+
+      .accept-btn {
+        --background: #{$primary-gradient};
+        --border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        height: 38px;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Rodapé
+.footer-section {
+  text-align: center;
+  margin-top: 4rem;
+  p {
+    color: $text-muted;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+}
+
+// Animações de Entrada
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

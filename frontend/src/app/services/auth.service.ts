@@ -2,16 +2,18 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
+// DTO para envio de dados ao Spring Boot
 export interface LoginDTO {
   email: string;
   senha?: string;
 }
 
+// Interface que reflete o usuário retornado pelo seu banco de dados PostgreSQL
 export interface UsuarioAutenticado {
   id: number;
   nome: string;
   email: string;
-  perfil: 'ADMINISTRADOR' | 'ATENDENTE';
+  perfil: 'ADMINISTRADOR' | 'ATENDENTE' | 'ADMIN'; // Suporta variações do Enum Java
   estabelecimentoId: number;
 }
 
@@ -22,14 +24,19 @@ export class AuthService {
 
   private readonly API_URL = 'http://localhost:8080/api/auth';
 
-  // WritableSignal para expor o usuário logado para todo o aplicativo
+  // WritableSignal para expor o usuário logado de forma reativa para todo o aplicativo
   public usuarioLogado: WritableSignal<UsuarioAutenticado | null> = signal(null);
 
   constructor(private http: HttpClient) {
-    // Ao iniciar o app, verifica se já existe uma sessão salva no navegador
+    // Ao iniciar o app, verifica se já existe uma sessão salva no localStorage do navegador
     const sessaoSalva = localStorage.getItem('librastalk_sessao');
     if (sessaoSalva) {
-      this.usuarioLogado.set(JSON.parse(sessaoSalva));
+      try {
+        this.usuarioLogado.set(JSON.parse(sessaoSalva));
+      } catch (e) {
+        console.error('Erro ao restaurar sessão salva:', e);
+        this.logout();
+      }
     }
   }
 
@@ -40,11 +47,19 @@ export class AuthService {
   login(credenciais: LoginDTO): Observable<UsuarioAutenticado> {
     return this.http.post<UsuarioAutenticado>(`${this.API_URL}/login`, credenciais).pipe(
       tap((usuario) => {
-        // Salva a sessão localmente no dispositivo para persistência
+        // Salva a sessão localmente no dispositivo para persistência (não deslogar no F5)
         localStorage.setItem('librastalk_sessao', JSON.stringify(usuario));
+        // Atualiza o Signal reativo da aplicação
         this.usuarioLogado.set(usuario);
       })
     );
+  }
+
+  /**
+   * Retorna os dados do usuário logado na sessão (Método de compatibilidade)
+   */
+  getUsuarioLogado(): UsuarioAutenticado | null {
+    return this.usuarioLogado();
   }
 
   /**

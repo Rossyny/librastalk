@@ -1,0 +1,117 @@
+<ion-content class="dashboard-content">
+  <div class="dashboard-container">
+
+    <!-- Topbar Corporativo Premium -->
+    <div class="top-nav animate-fade-in">
+      <div class="user-profile">
+        <div class="avatar-box">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="user-info">
+          <h3>{{ atendenteNome }}</h3>
+          <p>{{ atendentePerfil }}</p>
+        </div>
+      </div>
+
+      <button (click)="fazerLogout()" class="logout-btn">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Sair do Painel</span>
+      </button>
+    </div>
+
+    <!-- Grid Principal do Fluxo de Trabalho -->
+    <ion-grid class="ion-no-padding mt-6">
+      <ion-row>
+        
+        <!-- Coluna da Esquerda: Status e Status do Sistema -->
+        <ion-col size="12" sizeMd="4">
+          <ion-card class="status-card">
+            <ion-card-header>
+              <div class="icon-wrapper" [className]="estaDisponivel ? 'icon-wrapper online' : 'icon-wrapper offline'">
+                <ion-icon name="radio-outline" class="pulse-icon"></ion-icon>
+              </div>
+              <ion-card-title>Status de Conexão</ion-card-title>
+              <span class="card-subtitle">Gerenciamento de Escala</span>
+            </ion-card-header>
+
+            <ion-card-content class="pt-4">
+              <p class="description-text">
+                Alterne o botão abaixo para ficar disponível na fila de espera do estabelecimento. Quando ativo, chamados dos tablets tocarão imediatamente aqui.
+              </p>
+
+              <div class="toggle-container">
+                <span class="status-label" [className]="estaDisponivel ? 'text-online' : 'text-offline'">
+                  {{ estaDisponivel ? '● DISPONÍVEL P/ RECEBER' : '○ INSTABILIDADE / OCUPADO' }}
+                </span>
+                <ion-toggle [checked]="estaDisponivel" (ionChange)="alternarStatus($event)" color="tertiary"></ion-toggle>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Coluna da Direita: Central de Chamados em Tempo Real -->
+        <ion-col size="12" sizeMd="8">
+          <div class="central-chamados px-3">
+            <div class="section-title mb-4">
+              <h2>🎟️ Solicitações de Intérprete em Aberto</h2>
+              <p>Filas de atendimento geradas pelos caixas/totens em tempo real.</p>
+            </div>
+
+            <!-- Caso o atendente mude o toggle para Ocupado/Indisponível -->
+            <div *ngIf="!estaDisponivel" class="empty-state animate-fade-in">
+              <div class="empty-icon text-amber-500 bg-amber-50">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+              </div>
+              <h4>Você está Indisponível</h4>
+              <p>Ative o seu status de conexão na barra lateral esquerda para poder visualizar e aceitar chamados de clientes surdos.</p>
+            </div>
+
+            <!-- Caso esteja disponível mas não haja chamados na fila -->
+            <div *ngIf="estaDisponivel && chamados.length === 0" class="empty-state animate-fade-in">
+              <div class="empty-icon text-indigo-500 bg-indigo-50">
+                <ion-icon name="headset-outline"></ion-icon>
+              </div>
+              <h4>Fila Limpa por Aqui!</h4>
+              <p>Nenhum guichê físico solicitou atendimento neste momento. Aguarde na linha enquanto os clientes interagem com os totens.</p>
+            </div>
+
+            <!-- Lista de chamados dinâmicos ativos -->
+            <div *ngIf="estaDisponivel && chamados.length > 0" class="space-y-4">
+              <div *ngFor="let chamado of chamados" class="chamado-item-card animate-fade-in">
+                <div class="chamado-meta">
+                  <div class="guiche-badge">
+                    <span class="label">CAIXA</span>
+                    <span class="number">{{ chamado.guicheNumero }}</span>
+                  </div>
+                  <div class="chamado-details">
+                    <h4>{{ chamado.localizacao }}</h4>
+                    <p>Aguardando há <span class="wait-time">{{ chamado.tempoEspera }}</span> • Solicitado às {{ chamado.horarioSolicitacao }}</p>
+                  </div>
+                </div>
+
+                <div class="action-zone">
+                  <div class="tech-badges">
+                    <ion-badge color="light"><ion-icon name="videocam-outline"></ion-icon> Vídeo</ion-badge>
+                    <ion-badge color="light"><ion-icon name="chatbox-ellipses-outline"></ion-icon> Chat</ion-badge>
+                  </div>
+                  <ion-button (click)="aceitarChamado(chamado.id)" color="tertiary" class="accept-btn" mode="ios">
+                    <ion-icon name="call-outline" slot="start"></ion-icon>
+                    Atender Cliente
+                  </ion-button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </ion-col>
+
+      </ion-row>
+    </ion-grid>
+
+    <!-- Rodapé -->
+    <div class="footer-section">
+      <p>Painel de Operações Unificado • Canal de Atendimento Humano Libras Talk</p>
+    </div>
+
+  </div>
+</ion-content>

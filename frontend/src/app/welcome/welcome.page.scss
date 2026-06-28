@@ -1,18 +1,216 @@
-ion-content {
-  --background: #182c5c; // Slate-900 para fundo escuro sofisticado
-}
+// Variáveis locais integradas ao tema de login premium
+$bg-gradient: linear-gradient(135deg, #f8fafd 0%, #eef3f9 100%);
+$card-bg: #ffffff;
+$text-main: #1e293b;
+$text-muted: #64748b;
 
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
+$shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+$shadow-lg: 0 10px 25px -5px rgba(30, 41, 59, 0.05);
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+.welcome-content {
+  --background: #{$bg-gradient};
+
+  .welcome-container {
+    padding: 3rem 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+
+// Cabeçalho da página
+.header-section {
+  text-align: center;
+  margin-bottom: 3.5rem;
+
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 6px 16px;
+    border-radius: 100px;
+    box-shadow: $shadow-sm;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e2e8f0;
+
+    .pulse-dot {
+      display: flex;
+      position: relative;
+      width: 8px;
+      height: 8px;
+
+      .ping {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #10b981;
+        opacity: 0.75;
+        animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+
+      .dot {
+        position: relative;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+      }
+    }
+
+    .badge-text {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #4f46e5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  h2 {
+    color: $text-main;
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -1px;
+
+    span {
+      color: #4f46e5;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  p {
+    color: $text-muted;
+    font-size: 1.1rem;
+    max-w: 600px;
+    margin: 0 auto;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+}
+
+// Cards de Perfil
+.profile-card {
+  background: $card-bg;
+  border-radius: 20px;
+  box-shadow: $shadow-lg;
+  border: 1px solid #f1f5f9;
+  margin: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 340px;
+  justify-content: space-between;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 30px -10px rgba(79, 70, 229, 0.12);
+  }
+
+  ion-card-header {
+    padding: 1.75rem 1.5rem 0.5rem;
+
+    .icon-wrapper {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+
+      ion-icon {
+        font-size: 26px;
+      }
+    }
+
+    ion-card-title {
+      color: $text-main;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+      display: block;
+    }
+  }
+
+  ion-card-content {
+    padding: 0.5rem 1.5rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+
+    p {
+      color: $text-muted;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin: 0 0 1.5rem 0;
+      font-weight: 500;
+    }
+
+    ion-button {
+      --border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      height: 46px;
+      margin: 0;
+    }
+  }
+
+  // Cores customizadas por perfil
+  &.admin-card {
+    &:hover { border-color: #4f46e5; }
+    .icon-wrapper { background: #e0e7ff; ion-icon { color: #4f46e5; } }
+    .card-subtitle { color: #4f46e5; }
+    ion-button { --background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); }
+  }
+
+  &.attendant-card {
+    &:hover { border-color: #7c3aed; }
+    .icon-wrapper { background: #f3e8ff; ion-icon { color: #7c3aed; } }
+    .card-subtitle { color: #7c3aed; }
+    ion-button { --background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); }
+  }
+
+  &.tablet-card {
+    &:hover { border-color: #10b981; }
+    .icon-wrapper { background: #d1fae5; ion-icon { color: #10b981; } }
+    .card-subtitle { color: #10b981; }
+    ion-button { --background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+  }
+}
+
+// Rodapé
+.footer-section {
+  text-align: center;
+  margin-top: 4rem;
+  
+  p {
+    color: $text-muted;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
   }
 }
