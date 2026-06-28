@@ -1,0 +1,95 @@
+<ion-content class="ion-padding bg-slate-900 flex items-center justify-center min-h-screen">
+  <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center min-h-screen">
+    
+    <!-- Header de Apresentação -->
+    <div class="text-center mb-12 animate-fade-in">
+      <div class="inline-flex items-center gap-2 bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/20 mb-4">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Protótipo Ativo - Libras Talk</span>
+      </div>
+      
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+        Seja bem-vindo ao <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Libras Talk</span>
+      </h1>
+      <p class="mt-3 text-lg text-slate-400 max-w-xl mx-auto">
+        Plataforma inteligente de acessibilidade e comunicação bidirecional em tempo real para estabelecimentos B2B.
+      </p>
+    </div>
+
+    <!-- Grid de Perfis de Acesso -->
+    <ion-grid>
+      <ion-row class="ion-justify-content-center">
+        
+        <!-- Card 1: Perfil Gerente -->
+        <ion-col size="12" sizeMd="4">
+          <ion-card class="m-3 rounded-3xl border border-slate-800 bg-slate-950/60 shadow-xl transition-all hover:scale-105 hover:border-indigo-500/50 flex flex-col justify-between h-80">
+            <ion-card-header class="pb-2">
+              <div class="text-4xl mb-3">💼</div>
+              <ion-card-title class="text-white font-bold text-xl">Gerente</ion-card-title>
+              <p class="text-xs text-indigo-400 font-semibold uppercase tracking-wider mt-1">Painel Administrativo</p>
+            </ion-card-header>
+            
+            <ion-card-content class="flex flex-col justify-between flex-grow pt-2">
+              <p class="text-sm text-slate-400">
+                Cadastre a equipe de intérpretes, adicione novos guichês físicos e visualize os tokens de ativação gerados.
+              </p>
+              <ion-button expand="block" (click)="irParaGerente()" class="font-bold mt-4" color="primary">
+                Acessar Painel
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Card 2: Perfil Intérprete -->
+        <ion-col size="12" sizeMd="4">
+          <ion-card class="m-3 rounded-3xl border border-slate-800 bg-slate-950/60 shadow-xl transition-all hover:scale-105 hover:border-violet-500/50 flex flex-col justify-between h-80">
+            <ion-card-header class="pb-2">
+              <div class="text-4xl mb-3">🎙️</div>
+              <ion-card-title class="text-white font-bold text-xl">Intérprete</ion-card-title>
+              <p class="text-xs text-violet-400 font-semibold uppercase tracking-wider mt-1">Canal de Atendimento</p>
+            </ion-card-header>
+            
+            <ion-card-content class="flex flex-col justify-between flex-grow pt-2">
+              <p class="text-sm text-slate-400">
+                Faça login para receber chamados de atendimento em Libras via vídeo e chat integrados em tempo real.
+              </p>
+              <ion-button expand="block" (click)="irParaInterprete()" class="font-bold mt-4" color="tertiary">
+                Área do Intérprete
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <!-- Card 3: Perfil Tablet do Guichê -->
+        <ion-col size="12" sizeMd="4">
+          <ion-card class="m-3 rounded-3xl border border-slate-800 bg-slate-950/60 shadow-xl transition-all hover:scale-105 hover:border-emerald-500/50 flex flex-col justify-between h-80">
+            <ion-card-header class="pb-2">
+              <div class="text-4xl mb-3">📱</div>
+              <ion-card-title class="text-white font-bold text-xl">Tablet (Guichê)</ion-card-title>
+              <p class="text-xs text-emerald-400 font-semibold uppercase tracking-wider mt-1">Totem Físico do Caixa</p>
+            </ion-card-header>
+            
+            <ion-card-content class="flex flex-col justify-between flex-grow pt-2">
+              <p class="text-sm text-slate-400">
+                Ative o tablet do guichê físico usando o token autogerado do gerente e inicie solicitações de chamada.
+              </p>
+              <ion-button expand="block" (click)="irParaTablet()" class="font-bold mt-4" color="success">
+                Simular Guichê
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+      </ion-row>
+    </ion-grid>
+
+    <!-- Rodapé de Apoio -->
+    <div class="text-center mt-12 text-xs text-slate-500">
+      Libras Talk &copy; 2026 • Desenvolvido para Acessibilidade Sem Barreiras
+    </div>
+
+  </div>
+</ion-content>

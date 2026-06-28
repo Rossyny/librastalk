@@ -30,6 +30,12 @@ public class Atendimento {
 
     private String tipoDeficiencia; // Ex: "AUDITIVA", "MUDEZ"
 
+    // Adicione esta propriedade dentro da classe Atendimento.java
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = true) // Permite que o atendimento inicie sem identificar o cliente
+    private Cliente cliente;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;

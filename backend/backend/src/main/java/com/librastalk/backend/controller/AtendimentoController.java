@@ -1,10 +1,13 @@
 package com.librastalk.backend.controller;
 
 import com.librastalk.backend.model.Atendimento;
+import com.librastalk.backend.model.Cliente;
 import com.librastalk.backend.model.Guiche;
 import com.librastalk.backend.model.Usuario;
 import com.librastalk.backend.repository.GuicheRepository;
 import com.librastalk.backend.repository.UsuarioRepository;
+import com.librastalk.backend.repository.ClienteRepository;
+import com.librastalk.backend.repository.AtendimentoRepository;
 import com.librastalk.backend.service.AtendimentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,8 @@ public class AtendimentoController {
     private final AtendimentoService atendimentoService;
     private final UsuarioRepository usuarioRepository;
     private final GuicheRepository guicheRepository;
+    private final ClienteRepository clienteRepository;
+    private final AtendimentoRepository atendimentoRepository;
 
     /**
      * Endpoint para iniciar um atendimento (Relação Atendente + Tablet)
@@ -45,6 +50,41 @@ public class AtendimentoController {
             Atendimento atendimento = atendimentoService.iniciarAtendimento(usuario, guiche, tipoDeficiencia);
             
             return ResponseEntity.ok(atendimento);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    /**
+     * Endpoint para cadastrar e vincular um cliente a um atendimento em andamento
+     * URL: PUT http://localhost:8080/api/atendimentos/{id}/vincular-cliente
+     */
+    @PutMapping("/{id}/vincular-cliente")
+    public ResponseEntity<?> vincularCliente(@PathVariable Long id, @RequestBody Map<String, String> dadosCliente) {
+        try {
+            // 1. Busca o atendimento ativo que está rolando
+            Atendimento atendimento = atendimentoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Atendimento não encontrado. ID: " + id));
+
+            String cpf = dadosCliente.get("cpf");
+            String nome = dadosCliente.get("nome");
+            String contato = dadosCliente.get("contato");
+
+            // 2. Se o cliente já existir no banco pelo CPF, reutiliza. Se não, cadastra na hora!
+            Cliente cliente = clienteRepository.findByCpf(cpf)
+                    .orElseGet(() -> {
+                        Cliente novo = new Cliente();
+                        novo.setCpf(cpf);
+                        novo.setNome(nome);
+                        novo.setContato(contato);
+                        return clienteRepository.save(novo);
+                    });
+
+            // 3. Vincula o cliente ao atendimento atual e atualiza no banco
+            atendimento.setCliente(cliente);
+            Atendimento atualizado = atendimentoRepository.save(atendimento);
+
+            return ResponseEntity.ok(atualizado);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }

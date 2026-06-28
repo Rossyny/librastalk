@@ -53,4 +53,15 @@ public class AtendimentoService {
 
         return atendimentoRepository.save(atendimento);
     }
+
+    // Adicione no final do seu AtendimentoService.java se ainda não existirem:
+
+    public Atendimento buscarPorId(Long id) {
+        return atendimentoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Atendimento não encontrado. ID: " + id));
+    }
+
+    public Atendimento salvar(Atendimento atendimento) {
+        return atendimentoRepository.save(atendimento);
+    }
 }
