@@ -56,4 +56,4 @@ Para blindar o sistema contra inconsistências operacionais, o back-end valida r
 
 
 ## Fase atual do Desenvolvimento
-* ** Fase de testes com o Postman
+* ** Criação do Front End
