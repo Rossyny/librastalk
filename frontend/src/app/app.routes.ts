@@ -24,7 +24,7 @@ export const routes: Routes = [
   },
   {
     path: 'ativar-tablet',
-    loadComponent: () => import('./welcome/welcome.page').then((m) => m.WelcomePage),
+    loadComponent: () => import('./ativar-tablet/ativar-tablet.page').then((m) => m.AtivarTabletPage),
   },
   {
     path: '**',

@@ -1,0 +1,134 @@
+<ion-content class="tablet-content">
+  
+  <!-- Botão Flutuante de Retorno ao Portal (Visível apenas em modo de desenvolvimento) -->
+  <div class="top-bar-overlay">
+    <button (click)="voltarAoPortal()" class="btn-voltar">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+      <span>Voltar ao Portal</span>
+    </button>
+
+    <button *ngIf="estaAtivado" (click)="desativarEquipamento()" class="btn-desativar">
+      ⚠️ Desvincular Tablet
+    </button>
+  </div>
+
+  <div class="tablet-container">
+
+    <!-- FLUXO A: TELA DE ATIVAÇÃO POR TOKEN (Se não estiver ativado) -->
+    <div *ngIf="!estaAtivado" class="activation-card animate-fade-in">
+      <div class="activation-header">
+        <div class="icon-pulse">
+          <ion-icon name="tablet-portrait-outline"></ion-icon>
+        </div>
+        <h2>Ativação de Totem Físico</h2>
+        <p>Insira o token gerado pelo painel do gerente corporativo para vincular este tablet a um guichê físico.</p>
+      </div>
+
+      <!-- Feedbacks de Alerta -->
+      <div *ngIf="erroMensagem" class="alert-box error animate-fade-in">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ erroMensagem }}</span>
+      </div>
+
+      <form (submit)="ativarEquipamento()" class="activation-form">
+        <ion-item lines="none" class="custom-light-item">
+          <ion-icon name="key-outline" slot="start"></ion-icon>
+          <ion-input 
+            type="text" 
+            [(ngModel)]="tokenDigitado" 
+            name="token" 
+            placeholder="Ex: TALK39FA" 
+            maxlength="15"
+            class="uppercase-input">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" (click)="ativarEquipamento()" class="main-button mt-6" mode="ios">
+          Ativar Equipamento
+        </ion-button>
+      </form>
+
+      <!-- Barra de carregamento integrada -->
+      <ion-progress-bar *ngIf="carregando" type="indeterminate" color="success" class="mt-4"></ion-progress-bar>
+    </div>
+
+
+    <!-- FLUXO B: INTERFACE FINAL DO CLIENTE NO TOTEM (Se estiver ativado) -->
+    <div *ngIf="estaAtivado" class="totem-interface animate-fade-in">
+      
+      <!-- Cabeçalho do Totem Físico -->
+      <div class="totem-header">
+        <div class="badge-guiche">
+          GUICHÊ {{ guicheDados?.numeroIdentificador }}
+        </div>
+        <p class="estabelecimento-tag">{{ guicheDados?.descricao || 'Totem Ativo' }}</p>
+      </div>
+
+      <!-- Feedbacks de Operação -->
+      <div *ngIf="sucessoMensagem" class="alert-box success animate-fade-in mb-6">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <span>{{ sucessoMensagem }}</span>
+      </div>
+
+      <!-- Painel Principal de Chamada -->
+      <div class="totem-action-card" [className]="chamandoAtendente ? 'totem-action-card chamando' : 'totem-action-card'">
+        
+        <!-- Estado 1: Aguardando Ação (Pronto para Chamar) -->
+        <div *ngIf="!chamandoAtendente" class="state-container animate-fade-in">
+          <div class="illustration-zone">
+            <div class="avatar-circle">👋</div>
+          </div>
+          
+          <h1 class="text-slate-800 font-extrabold text-3xl mb-2">Precisa de ajuda em Libras?</h1>
+          <p class="text-slate-500 font-semibold max-w-lg mx-auto mb-8 text-base">
+            Toque no botão abaixo para iniciar uma chamada de vídeo ao vivo com um intérprete e falar com o atendente do caixa.
+          </p>
+
+          <button (click)="alternarChamada()" class="btn-totem-call">
+            <ion-icon name="videocam-outline"></ion-icon>
+            <span>Iniciar Atendimento</span>
+          </button>
+        </div>
+
+        <!-- Estado 2: Chamando Intérprete em Tempo Real -->
+        <div *ngIf="chamandoAtendente" class="state-container animate-pulse-custom">
+          <div class="radar-container">
+            <div class="radar-wave wave1"></div>
+            <div class="radar-wave wave2"></div>
+            <div class="radar-center">
+              <ion-icon name="videocam-outline"></ion-icon>
+            </div>
+          </div>
+
+          <h1 class="text-slate-800 font-extrabold text-3xl mb-2">Chamando Intérprete...</h1>
+          <p class="text-indigo-600 font-bold max-w-lg mx-auto mb-8 text-lg">
+            Aguarde um instante. Um atendente de Libras está se conectando ao seu guichê.
+          </p>
+
+          <button (click)="alternarChamada()" class="btn-totem-cancel">
+            Cancelar Solicitação
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Rodapé com Recursos de Acessibilidade -->
+      <div class="totem-features mt-8">
+        <div class="feature-item">
+          <ion-icon name="videocam-outline"></ion-icon>
+          <span>Vídeo HD</span>
+        </div>
+        <div class="feature-item">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>Bilingue</span>
+        </div>
+        <div class="feature-item">
+          <ion-icon name="volume-mediumOutline"></ion-icon>
+          <span>Áudio Ativo</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

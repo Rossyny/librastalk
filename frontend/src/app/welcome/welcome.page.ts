@@ -44,6 +44,6 @@ export class WelcomePage {
   }
 
   irParaTablet() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/ativar-tablet']);
   }
 }
