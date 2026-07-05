@@ -470,3 +470,130 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(36deg); }
 }
+
+// =========================================================================
+// ⌨️ TECLADO VIRTUAL ACESSÍVEL (LIBRAS + TEXTO)
+// =========================================================================
+
+// Importação opcional da fonte de Libras nos assets (exemplo de implementação)
+@font-face {
+  font-family: 'LibrasHand';
+  src: url('/assets/fonts/libras-hand.woff2') format('woff2');
+  font-display: swap;
+}
+
+.totem-keyboard-container {
+  width: 100%;
+  background: #111827;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  margin-top: 16px;
+  padding: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+
+  .keyboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px 8px 8px;
+    border-bottom: 1px solid #232d3d;
+    
+    span {
+      color: #9ca3af;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .btn-close-keyboard {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.2);
+      }
+    }
+  }
+
+  .keyboard-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .keyboard-key {
+    flex: 1;
+    min-height: 64px;
+    background: #1f2937;
+    border: 1px solid #4b5563;
+    border-radius: 10px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 2px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+
+    &:active {
+      transform: scale(0.95);
+      background: #4f46e5;
+      border-color: #6366f1;
+    }
+
+    .key-text {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    // Área reservada para o símbolo da mão em libras
+    .key-libras-hand {
+      margin-top: 4px;
+      color: #9ca3af;
+      
+      .libras-font::before {
+        font-family: 'LibrasHand', sans-serif;
+        font-size: 24px;
+        // Injeta a letra correspondente para acionar o glifo da fonte de libras
+        content: attr(data-letter); 
+        text-transform: lowercase;
+      }
+    }
+
+    // Estilizações especiais para teclas de controle
+    &.key-space {
+      flex: 3;
+      background: #374151;
+      justify-content: center;
+    }
+
+    &.key-backspace {
+      flex: 1.8;
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      justify-content: center;
+
+      &:active {
+        background: #ef4444;
+        color: #ffffff;
+      }
+    }
+  }
+}

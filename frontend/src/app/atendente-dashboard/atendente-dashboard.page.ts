@@ -55,7 +55,7 @@ export interface ChamadoEntrante {
 export class AtendenteDashboardPage implements OnInit, OnDestroy {
 
   atendenteNome: string = '';
-  atendentePerfil: string = 'Caixa de Atendimento';
+  atendentePerfil: string = 'Atendente de Caixa';
 
   estaDisponivel: boolean = true;
   atendimentoAtivo: boolean = false;
@@ -103,12 +103,11 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
   }
 
   carregarDadosDoAtendente() {
-    // 1. Tenta pegar o ID do usuário que fez login guardado no localStorage
-    // (Pode estar salvo como 'usuarioId', 'id_usuario' ou dentro de um objeto 'usuario')
+    // 1. Tenta pegar o ID direto do localStorage (caso use a chave avulsa)
     let usuarioId = localStorage.getItem('usuarioId') || localStorage.getItem('id_usuario');
 
-    // Se você guardou o objeto inteiro do usuário no login, tentamos extrair dele:
-    const usuarioSalvo = localStorage.getItem('librastalk_usuario_logado');
+    // 🌟 CORREÇÃO CIRÚRGICA: Alinhado com a chave do seu AuthService ('librastalk_sessao')
+    const usuarioSalvo = localStorage.getItem('librastalk_sessao');
     if (usuarioSalvo) {
       try {
         const obj = JSON.parse(usuarioSalvo);
@@ -118,11 +117,10 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
       }
     }
 
-    // 2. Se não encontrar nenhum ID no localStorage (caso o fluxo de login ainda não salve o ID),
-    // vamos deixar um ID padrão temporário para não quebrar a requisição.
+    // 2. Se mesmo assim não encontrar nenhum ID (fallback de segurança)
     if (!usuarioId) {
       console.warn('Painel: Nenhum ID de atendente encontrado no localStorage. Usando ID 2 como fallback.');
-      usuarioId = '2'; // <--- Troque para o ID da Maria Kattielly no banco para testar se o login não estiver salvando!
+      usuarioId = '2'; 
     }
 
     console.log(`Painel: Buscando dados do atendente ID ${usuarioId} no banco de dados...`);
@@ -132,7 +130,7 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
         this.atendenteNome = usuarioDoBanco.nome;
         
         if (usuarioDoBanco.perfil === 'ATENDENTE') {
-          this.atendentePerfil = 'Intérprete de Libras';
+          this.atendentePerfil = 'Atendente de Caixa';
         } else if (usuarioDoBanco.perfil === 'ADMIN') {
           this.atendentePerfil = 'Administrador do Sistema';
         } else {
@@ -143,7 +141,6 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Painel: Erro ao buscar nome do atendente no banco:', err);
-        // Fallback apenas se a API falhar completamente
         this.atendenteNome = 'Atendente Ativo';
         this.atendentePerfil = 'Intérprete de Libras Certificado';
       }

@@ -6,7 +6,7 @@ export interface MensagemChat {
   id?: number;
   atendimentoId: number;
   remetente: 'CLIENTE' | 'ATENDENTE';
-  conteudoTexto: String;
+  conteudoTexto: string;
   enviadoEm?: string;
 }
 

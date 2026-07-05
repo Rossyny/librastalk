@@ -16,6 +16,7 @@ import {
 import { WebSocketService, MensagemChat } from '../services/websocket.service';
 import { Subscription } from 'rxjs';
 import { StompSubscription } from '@stomp/stompjs';
+import { VlibrasService } from '../services/vlibras.service';
 
 @Component({
   selector: 'app-ativar-tablet',
@@ -26,11 +27,21 @@ import { StompSubscription } from '@stomp/stompjs';
     CommonModule, FormsModule, IonContent, IonButton, 
     IonInput, IonItem, IonIcon, IonProgressBar, 
     IonGrid, IonRow, IonCol, IonText
-  ]
+  ],
+  providers: [VlibrasService]
 })
 export class AtivarTabletPage implements OnInit, OnDestroy {
 
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
+
+  exibirTecladoVirtual: boolean = false;
+
+  linhasTeclado = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ç'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', 'BACKSPACE']
+  ];
 
   // Controladores de Fluxo de Telas (Oficiais)
   equipamentoConfigurado: boolean = false;
@@ -74,7 +85,7 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
 
   private readonly API_BASE = 'http://localhost:8080/api';
 
-  constructor(private router: Router, private http: HttpClient, private wsService: WebSocketService) {
+  constructor(private router: Router, private http: HttpClient, private wsService: WebSocketService, private vlibrasService: VlibrasService) {
     addIcons({ 
       tabletPortraitOutline, 
       keyOutline, 
@@ -85,16 +96,19 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
       peopleOutline,
       volumeMediumOutline,
       sendOutline,
-      closeCircleOutline
+      closeCircleOutline,
+      vlibras: 'https://vlibras.gov.br/app/vlibras-plugin.js'
     });
   }
 
   ngOnInit() {
     this.verificarConfiguracaoPrevia();
+    this.vlibrasService.inicializar();
   }
 
   ngOnDestroy() {
     this.desconectarChatAtivo();
+    this.vlibrasService.destruir();
   }
 
   verificarConfiguracaoPrevia() {
@@ -230,6 +244,11 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
         if (!this.chatConectado) this.chatConectado = true;
         this.mensagens.push(novaMsg);
         this.rolarChatParaBaixo();
+
+        // 🔥 NOVO: Força o boneco do VLibras a traduzir a mensagem se ela vier do ATENDENTE
+        if (novaMsg.remetente === 'ATENDENTE' && novaMsg.conteudoTexto) {
+          this.traduzirTextoParaLibras(novaMsg.conteudoTexto);
+        }
       }
     });
   }
@@ -296,6 +315,7 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
     this.guicheDados = null;
     this.equipamentoConfigurado = false;
     this.tokenInput = '';
+    this.vlibrasService.exibirWidget(false); // Oculta o widget
   }
 
   private rolarChatParaBaixo() {
@@ -304,5 +324,76 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
         this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
       }
     }, 100);
+  }
+
+  // Métodos do Teclado Virtual
+  abrirTeclado() {
+    this.exibirTecladoVirtual = true;
+  }
+
+  fecharTeclado() {
+    this.exibirTecladoVirtual = false;
+  }
+
+  digitarTecla(tecla: string) {
+    if (tecla === 'BACKSPACE') {
+      this.textoMensagem = this.textoMensagem.slice(0, -1);
+    } else {
+      this.textoMensagem += tecla;
+    }
+  }
+
+  /**
+   * Comunica diretamente com a instância do Widget do VLibras na janela
+   */
+  private traduzirTextoParaLibras(texto: string) {
+    try {
+      // Força a limpeza de espaços e conversão rápida para string primitiva
+      const textoTratado = String(texto).trim();
+      if (!textoTratado) return;
+
+      // 🔥 1. FORÇA A VISIBILIDADE E EXPANSÃO SE O WIDGET ESTIVER MINIMIZADO
+      // O botão azul padrão do VLibras possui o atributo [vw-access-button]
+      const btnAcesso = document.querySelector('[vw-access-button]');
+      // O wrapper ganha a classe '.active' quando o boneco está aberto na tela
+      const widgetAberto = document.querySelector('.vw-plugin-wrapper.active');
+
+      if (btnAcesso && !widgetAberto) {
+        console.log('VLibras Talk: Forçando abertura visual do avatar...');
+        (btnAcesso as HTMLElement).click();
+      }
+
+      // @ts-ignore
+      const widget = window.vlibrasWidget;
+
+      // Abordagem A: Pelo objeto do Widget principal instanciado
+      if (widget && typeof widget.translate === 'function') {
+        console.log('VLibras Talk: Traduzindo via API do widget...');
+        widget.translate(textoTratado);
+        return;
+      }
+
+      // Abordagem B: Fallback injetando o texto direto no input oculto do plugin do VLibras
+      const vlibrasInput = document.querySelector('.vw-plugin-wrapper input') as HTMLInputElement || 
+                           document.querySelector('[vw-plugin-wrapper] input') as HTMLInputElement;
+
+      if (vlibrasInput) {
+        console.log('VLibras Talk: Traduzindo via input de Fallback do DOM...');
+        vlibrasInput.value = textoTratado;
+        
+        // Dispara o evento de "input" para o widget interceptar o texto
+        const eventoInput = new Event('input', { bubbles: true });
+        vlibrasInput.dispatchEvent(eventoInput);
+        
+        // Simula o clique de envio no botão interno do widget
+        const btnEnviar = document.querySelector('.vw-plugin-wrapper button') as HTMLButtonElement;
+        if (btnEnviar) btnEnviar.click();
+        return;
+      }
+
+      console.warn('VLibras ainda não está totalmente pronto no DOM ou na janela global.');
+    } catch (error) {
+      console.error('Erro ao acionar a tradução automática do VLibras:', error);
+    }
   }
 }
