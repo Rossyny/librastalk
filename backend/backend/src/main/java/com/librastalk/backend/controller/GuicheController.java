@@ -49,4 +49,48 @@ public class GuicheController {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
+    /**
+     * Endpoint para validar o token inserido no tablet e retornar os dados do guichê
+     * URL: POST http://localhost:8080/api/guiches/validar-token
+     */
+    @PostMapping("/validar-token")
+    @CrossOrigin(origins = "*") // Garante o CORS isolado caso o global falhe
+    public ResponseEntity<?> validarToken(@RequestBody Map<String, String> body) {
+        try {
+            String token = body.get("token");
+            if (token == null || token.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "O token não foi informado."));
+            }
+
+            System.out.println("===> Tentando validar o token do tablet: " + token);
+
+            // Busca o guichê pelo token de acesso no banco de dados
+            Guiche guiche = guicheRepository.findByTokenAcesso(token.trim())
+                    .orElseThrow(() -> new RuntimeException("Código de ativação inválido ou não encontrado."));
+
+            // Blindagem contra NullPointerException caso algum relacionamento esteja vazio no banco
+            String identificacao = guiche.getIdentificacao() != null ? guiche.getIdentificacao() : "Guichê sem identificação";
+            String localizacao = "Estabelecimento Não Informado";
+            
+            if (guiche.getEstabelecimento() != null && guiche.getEstabelecimento().getNome() != null) {
+                localizacao = guiche.getEstabelecimento().getNome();
+            }
+
+            // Criação do map dinâmico para aceitar variações com segurança
+            Map<String, Object> resposta = new java.util.HashMap<>();
+            resposta.put("id", guiche.getId());
+            resposta.put("numeroIdentificador", identificacao);
+            resposta.put("localizacao", localizacao);
+
+            System.out.println("===> Token validado com sucesso para o guichê ID: " + guiche.getId());
+            return ResponseEntity.ok(resposta);
+
+        } catch (Exception e) {
+            // Imprime o erro real no terminal da sua IDE (Eclipse/IntelliJ)
+            System.err.println("❌ ERRO AO VALIDAR TOKEN: " + e.getMessage());
+            e.printStackTrace(); 
+            
+            return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
+        }
+    }
 }

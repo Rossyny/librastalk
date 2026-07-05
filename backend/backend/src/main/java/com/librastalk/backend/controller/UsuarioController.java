@@ -53,4 +53,25 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
+
+    /**
+     * 🔥 NOVO: Endpoint para buscar dados de um usuário pelo ID
+     * URL: GET http://localhost:8080/api/usuarios/{id}
+     */
+    @GetMapping("/{id}")
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        try {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado. ID: " + id));
+
+            // Retorna os dados do banco mapeados lindamente em JSON
+            return ResponseEntity.ok(Map.of(
+                "nome", usuario.getNome(),
+                "perfil", usuario.getPerfil() != null ? usuario.getPerfil().toString() : "ATENDENTE"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
 }

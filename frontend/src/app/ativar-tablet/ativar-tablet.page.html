@@ -1,134 +1,128 @@
-<ion-content class="tablet-content">
-  
-  <!-- Botão Flutuante de Retorno ao Portal (Visível apenas em modo de desenvolvimento) -->
-  <div class="top-bar-overlay">
+<ion-content [fullscreen]="true" class="totem-bg">
+  <div class="totem-header-actions">
     <button (click)="voltarAoPortal()" class="btn-voltar">
       <ion-icon name="arrow-back-outline"></ion-icon>
-      <span>Voltar ao Portal</span>
+      Portal
     </button>
-
+    
     <button *ngIf="estaAtivado" (click)="desativarEquipamento()" class="btn-desativar">
-      ⚠️ Desvincular Tablet
+      <ion-icon name="close-circle-outline"></ion-icon>
+      Desativar
     </button>
   </div>
 
-  <div class="tablet-container">
-
-    <!-- FLUXO A: TELA DE ATIVAÇÃO POR TOKEN (Se não estiver ativado) -->
+  <div class="totem-container">
+    
     <div *ngIf="!estaAtivado" class="activation-card animate-fade-in">
-      <div class="activation-header">
-        <div class="icon-pulse">
-          <ion-icon name="tablet-portrait-outline"></ion-icon>
-        </div>
-        <h2>Ativação de Totem Físico</h2>
-        <p>Insira o token gerado pelo painel do gerente corporativo para vincular este tablet a um guichê físico.</p>
+      <div class="totem-icon-box animate-bounce-slow">
+        <ion-icon name="tablet-portrait-outline"></ion-icon>
       </div>
+      
+      <h2>Configurar Dispositivo</h2>
+      <p class="totem-subtitle">Introduz o código gerado no painel administrativo para associar este tablet a um guiché.</p>
 
-      <!-- Feedbacks de Alerta -->
       <div *ngIf="erroMensagem" class="alert-box error animate-fade-in">
         <ion-icon name="alert-circle-outline"></ion-icon>
         <span>{{ erroMensagem }}</span>
       </div>
-
-      <form (submit)="ativarEquipamento()" class="activation-form">
-        <ion-item lines="none" class="custom-light-item">
-          <ion-icon name="key-outline" slot="start"></ion-icon>
-          <ion-input 
-            type="text" 
-            [(ngModel)]="tokenDigitado" 
-            name="token" 
-            placeholder="Ex: TALK39FA" 
-            maxlength="15"
-            class="uppercase-input">
-          </ion-input>
-        </ion-item>
-
-        <ion-button expand="block" (click)="ativarEquipamento()" class="main-button mt-6" mode="ios">
-          Ativar Equipamento
-        </ion-button>
-      </form>
-
-      <!-- Barra de carregamento integrada -->
-      <ion-progress-bar *ngIf="carregando" type="indeterminate" color="success" class="mt-4"></ion-progress-bar>
-    </div>
-
-
-    <!-- FLUXO B: INTERFACE FINAL DO CLIENTE NO TOTEM (Se estiver ativado) -->
-    <div *ngIf="estaAtivado" class="totem-interface animate-fade-in">
       
-      <!-- Cabeçalho do Totem Físico -->
-      <div class="totem-header">
-        <div class="badge-guiche">
-          GUICHÊ {{ guicheDados?.numeroIdentificador }}
-        </div>
-        <p class="estabelecimento-tag">{{ guicheDados?.descricao || 'Totem Ativo' }}</p>
-      </div>
-
-      <!-- Feedbacks de Operação -->
-      <div *ngIf="sucessoMensagem" class="alert-box success animate-fade-in mb-6">
+      <div *ngIf="sucessoMensagem" class="alert-box success animate-fade-in">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
         <span>{{ sucessoMensagem }}</span>
       </div>
 
-      <!-- Painel Principal de Chamada -->
-      <div class="totem-action-card" [className]="chamandoAtendente ? 'totem-action-card chamando' : 'totem-action-card'">
+      <ion-item lines="none" class="totem-input-item">
+        <ion-icon slot="start" name="key-outline"></ion-icon>
+        <ion-input 
+          type="text" 
+          placeholder="Ex: TALK123" 
+          [(ngModel)]="tokenAtivacao"
+          [disabled]="carregando"
+          (keyup.enter)="enviarTokenAtivacao()">
+        </ion-input>
+      </ion-item>
+
+      <button (click)="enviarTokenAtivacao()" [disabled]="carregando || !tokenAtivacao" class="btn-totem-submit">
+        <span *ngIf="!carregando">Ativar Equipamento</span>
+        <span *ngIf="carregando">A processar...</span>
+      </button>
+    </div>
+
+    <div *ngIf="estaAtivado" class="w-full">
+      
+      <div class="guiche-info-badge animate-fade-in">
         
-        <!-- Estado 1: Aguardando Ação (Pronto para Chamar) -->
-        <div *ngIf="!chamandoAtendente" class="state-container animate-fade-in">
-          <div class="illustration-zone">
-            <div class="avatar-circle">👋</div>
-          </div>
-          
-          <h1 class="text-slate-800 font-extrabold text-3xl mb-2">Precisa de ajuda em Libras?</h1>
-          <p class="text-slate-500 font-semibold max-w-lg mx-auto mb-8 text-base">
-            Toque no botão abaixo para iniciar uma chamada de vídeo ao vivo com um intérprete e falar com o atendente do caixa.
-          </p>
-
-          <button (click)="alternarChamada()" class="btn-totem-call">
-            <ion-icon name="videocam-outline"></ion-icon>
-            <span>Iniciar Atendimento</span>
-          </button>
-        </div>
-
-        <!-- Estado 2: Chamando Intérprete em Tempo Real -->
-        <div *ngIf="chamandoAtendente" class="state-container animate-pulse-custom">
-          <div class="radar-container">
-            <div class="radar-wave wave1"></div>
-            <div class="radar-wave wave2"></div>
-            <div class="radar-center">
-              <ion-icon name="videocam-outline"></ion-icon>
-            </div>
-          </div>
-
-          <h1 class="text-slate-800 font-extrabold text-3xl mb-2">Chamando Intérprete...</h1>
-          <p class="text-indigo-600 font-bold max-w-lg mx-auto mb-8 text-lg">
-            Aguarde um instante. Um atendente de Libras está se conectando ao seu guichê.
-          </p>
-
-          <button (click)="alternarChamada()" class="btn-totem-cancel">
-            Cancelar Solicitação
-          </button>
-        </div>
-
+          <strong>{{ guicheDados?.numeroIdentificador || 'Guichê Ativo' }}</strong>
+        
       </div>
 
-      <!-- Rodapé com Recursos de Acessibilidade -->
-      <div class="totem-features mt-8">
-        <div class="feature-item">
-          <ion-icon name="videocam-outline"></ion-icon>
-          <span>Vídeo HD</span>
-        </div>
-        <div class="feature-item">
+      <div *ngIf="!chamandoAtendente && !chatConectado" class="totem-welcome-box animate-fade-in">
+        <div class="totem-hero-icon main-green animate-pulse-slow">
           <ion-icon name="people-outline"></ion-icon>
-          <span>Bilingue</span>
         </div>
-        <div class="feature-item">
+        <h1>Precisa de Atendimento em Libras?</h1>
+        <p class="totem-subtitle">Toque no botão abaixo para conversar com um atendente em libras.</p>
+        
+        <button (click)="alternarChamada()" class="btn-totem-call">
+          <ion-icon name="videocam-outline"></ion-icon>
+          Chamar Atendente
+        </button>
+      </div>
+
+      <div *ngIf="chamandoAtendente && !chatConectado" class="totem-welcome-box animate-fade-in">
+        <div class="totem-hero-icon main-purple animate-spin-slow">
           <ion-icon name="volume-mediumOutline"></ion-icon>
-          <span>Áudio Ativo</span>
         </div>
+        <h1>Procurando Atendente...</h1>
+        <p class="totem-subtitle">O seu pedido foi enviado para a fila de espera. Aguarde um momento enquanto localizamos um operador disponível.</p>
+        
+        <ion-progress-bar type="indeterminate" color="secondary" class="totem-progress"></ion-progress-bar>
+        
+        <button (click)="alternarChamada()" class="btn-totem-cancel">
+          Desistir da Fila
+        </button>
+      </div>
+
+      <div *ngIf="chatConectado" class="totem-chat-box animate-fade-in">
+        <div class="chat-header">
+          <div class="status-indicator online"></div>
+          <h3>Intérprete Conectado</h3>
+        </div>
+
+        <div #scrollContainer class="chat-messages-body">
+          <div *ngFor="let msg of mensagens" 
+               [ngClass]="{'msg-cliente': msg.remetente === 'CLIENTE', 'msg-atendente': msg.remetente === 'ATENDENTE'}" 
+               class="message-bubble animate-fade-in">
+            <div class="message-text">{{ msg.conteudoTexto }}</div>
+          </div>
+          
+          <div *ngIf="mensagens.length === 0" class="chat-empty-state">
+            <p>Conexão estabelecida! Pode iniciar a conversa.</p>
+          </div>
+        </div>
+
+        <div class="chat-footer-input">
+          <ion-item lines="none" class="chat-input-item">
+            <ion-input 
+              type="text" 
+              placeholder="Escreva uma mensagem..." 
+              [(ngModel)]="textoMensagem"
+              (keyup.enter)="enviarMensagemWS()">
+            </ion-input>
+          </ion-item>
+          <button (click)="enviarMensagemWS()" [disabled]="!textoMensagem.trim()" class="btn-chat-send">
+            <ion-icon name="send-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="atendimentoAtivo" class="totem-actions-footer animate-fade-in">
+        <ion-button color="danger" fill="clear" (click)="encerrarPeloTotem()">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Encerrar Sessão
+        </ion-button>
       </div>
 
     </div>
-
   </div>
 </ion-content>

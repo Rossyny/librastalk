@@ -1,352 +1,454 @@
-$bg-gradient: linear-gradient(135deg, #f8fafd 0%, #eef3f9 100%);
-$card-bg: #ffffff;
-$text-main: #1e293b;
-$text-muted: #64748b;
-$shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-$shadow-lg: 0 10px 25px -5px rgba(30, 41, 59, 0.05);
-$success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%); // Verde Esmeralda do Tablet
+// =========================================================================
+// 🎨 ESTILIZAÇÃO DO ECOSSISTEMA DO TOTEM (LIBRAS TALK)
+// =========================================================================
 
-.tablet-content {
-  --background: #{$bg-gradient};
-  position: relative;
-
-  .tablet-container {
-    padding: 3rem 1.5rem;
-    max-width: 900px;
-    margin: 0 auto;
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+.totem-bg {
+  --background: #111827; // Fundo escuro moderno (Slate 900)
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-// Overlay de controle superior
-.top-bar-overlay {
+.totem-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 650px;
+  min-height: 80vh;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+// 📌 AÇÕES FLUTUANTES SUPERIORES
+.totem-header-actions {
   position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-  right: 1.5rem;
+  top: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  z-index: 100;
+  z-index: 10;
 
-  .btn-voltar {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #475569;
-    padding: 8px 16px;
-    border-radius: 99px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    box-shadow: $shadow-sm;
+  button {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-
-    &:active {
-      transform: translateY(1px);
-    }
-  }
-
-  .btn-desativar {
-    background: #fff5f5;
-    border: 1px solid #fee2e2;
-    color: #ef4444;
-    padding: 8px 16px;
-    border-radius: 99px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    box-shadow: $shadow-sm;
-    cursor: pointer;
-
-    &:active {
-      background: #fde8e8;
-    }
-  }
-}
-
-// CARD 1: Ativação de Equipamento (Design idêntico ao login)
-.activation-card {
-  background: white;
-  border-radius: 24px;
-  box-shadow: $shadow-lg;
-  border: 1px solid #e2e8f0;
-  padding: 3rem 2rem;
-  width: 100%;
-  max-width: 460px;
-  text-align: center;
-
-  .activation-header {
-    margin-bottom: 2rem;
-
-    .icon-pulse {
-      width: 64px;
-      height: 64px;
-      background: #d1fae5;
-      color: #10b981;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      font-size: 32px;
-    }
-
-    h2 {
-      color: $text-main;
-      font-size: 1.6rem;
-      font-weight: 800;
-      margin: 0 0 8px 0;
-      letter-spacing: -0.5px;
-    }
-
-    p {
-      color: $text-muted;
-      font-size: 0.92rem;
-      line-height: 1.5;
-      margin: 0;
-      font-weight: 500;
-    }
-  }
-
-  .custom-light-item {
-    --background: #f1f5f9;
-    --border-radius: 14px;
-    --padding-start: 1rem;
-    --inner-padding-end: 1rem;
-    font-size: 1rem;
-    border: 1px solid #e2e8f0;
+    border: none;
+    transition: all 0.2s ease-in-out;
+    background: rgba(255, 255, 255, 0.05);
+    color: #9ca3af;
+    backdrop-filter: blur(8px);
 
     ion-icon {
-      color: $text-muted;
-      margin-right: 10px;
-      font-size: 20px;
+      font-size: 18px;
     }
 
-    ion-input {
-      --color: #{$text-main};
-      font-weight: 700;
-      letter-spacing: 1px;
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
     }
   }
 
-  .main-button {
-    --background: #{$success-gradient};
-    --border-radius: 14px;
-    font-weight: 700;
-    font-size: 1rem;
-    height: 52px;
-    margin: 0;
+  .btn-desativar:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
   }
 }
 
-// CARD 2: INTERFACE DE TOTEM DE ATENDIMENTO
-.totem-interface {
+// =========================================================================
+// 🖥️ TELA 1: CARD DE ATIVAÇÃO / PAREAMENTO
+// =========================================================================
+.activation-card {
+  background: #1f2937; // Gray 800
+  border: 1px solid #374151;
+  border-radius: 24px;
+  padding: 40px;
   width: 100%;
-  max-width: 720px;
   text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 
-  .totem-header {
-    margin-bottom: 2.5rem;
-
-    .badge-guiche {
-      display: inline-block;
-      background: #10b981;
-      color: white;
-      font-weight: 900;
-      font-size: 1.1rem;
-      padding: 6px 20px;
-      border-radius: 100px;
-      letter-spacing: 1px;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-    }
-
-    .estabelecimento-tag {
-      color: $text-muted;
-      font-size: 1rem;
-      font-weight: 700;
-      margin-top: 8px;
-    }
-  }
-
-  .totem-action-card {
-    background: white;
-    border-radius: 32px;
-    border: 1px solid #e2e8f0;
-    box-shadow: $shadow-lg;
-    padding: 4rem 2rem;
-    transition: all 0.4s ease;
-
-    &.chamando {
-      border-color: #4f46e5;
-      box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.15);
-    }
-
-    .illustration-zone {
-      margin-bottom: 2rem;
-
-      .avatar-circle {
-        width: 100px;
-        height: 100px;
-        background: #f1f5f9;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        font-size: 50px;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-      }
-    }
-
-    // Botão gigante de Chamada do Totem
-    .btn-totem-call {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      color: white;
-      font-weight: 800;
-      font-size: 1.3rem;
-      padding: 20px 48px;
-      border-radius: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
-      transition: all 0.2s;
-
-      ion-icon {
-        font-size: 28px;
-      }
-
-      &:active {
-        transform: scale(0.97);
-        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
-      }
-    }
-
-    // Botão de Cancelamento
-    .btn-totem-cancel {
-      background: #fff5f5;
-      border: 1px solid #fee2e2;
-      color: #ef4444;
-      font-weight: 700;
-      font-size: 1rem;
-      padding: 14px 32px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-
-      &:active {
-        background: #fde8e8;
-      }
-    }
-  }
-
-  // Recursos de Acessibilidade no Rodapé do Totem
-  .totem-features {
+  .totem-icon-box {
+    width: 80px;
+    height: 80px;
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1; // Indigo
+    border-radius: 20px;
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 2.5rem;
+    margin: 0 auto 24px auto;
+    font-size: 40px;
+  }
 
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: $text-muted;
-      font-weight: 700;
-      font-size: 0.9rem;
+  h2 {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+  }
 
-      ion-icon {
-        font-size: 18px;
-        color: #10b981;
-      }
-    }
+  .totem-subtitle {
+    color: #9ca3af;
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
   }
 }
 
-// Estrutura do Radar de Chamada Ativa
-.radar-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 2.5rem;
+// INPUTS CUSTOMIZADOS DO IONIC
+.totem-input-item {
+  --background: #111827;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #374151;
+  color: #ffffff;
+
+  ion-icon {
+    color: #6366f1;
+    font-size: 20px;
+    margin-right: 12px;
+  }
+
+  ion-input {
+    --color: #ffffff;
+    --placeholder-color: #6b7280;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+}
+
+// BOTÕES DO TOTEM
+.btn-totem-submit {
+  width: 100%;
+  background: #6366f1;
+  color: #ffffff;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not([disabled]) {
+    background: #4f46e5;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// CAIXAS DE ALERTAS
+.alert-box {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
 
-  .radar-center {
-    width: 64px;
-    height: 64px;
-    background: #4f46e5;
-    color: white;
+  ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  &.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  &.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+}
+
+// =========================================================================
+// 🏢 TELA 2: OPERAÇÃO DO TOTEM (ACOLHIMENTO E FILA)
+// =========================================================================
+
+.guiche-info-badge {
+  background: rgba(255, 255, 255, 0.08); // Um pouquinho mais claro para dar contraste
+  border: 1px solid rgba(255, 255, 255, 0.2); // Borda branca sutil bem definida
+  padding: 8px 18px;
+  border-radius: 20px;
+  margin: 40px auto 20px auto;
+  display: inline-block;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #ffffff !important; // 🔥 Garante texto 100% branco independente do ion-text
+
+  strong {
+    color: #ffffff !important; // 🔥 Garante que a tag strong herde o branco brilhante
+    font-weight: 700;
+  }
+}
+
+.totem-welcome-box {
+  text-align: center;
+  width: 100%;
+  padding: 40px 20px;
+
+  h1 {
+    color: #ffffff;
+    font-size: 32px;
+    font-weight: 800;
+    margin: 24px 0 12px 0;
+  }
+
+  .totem-subtitle {
+    color: #9ca3af;
+    font-size: 16px;
+    max-width: 480px;
+    margin: 0 auto 36px auto;
+    line-height: 1.6;
+  }
+
+  .totem-hero-icon {
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    z-index: 5;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-  }
+    margin: 0 auto;
+    font-size: 56px;
 
-  .radar-wave {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(79, 70, 229, 0.15);
-    z-index: 1;
-
-    &.wave1 {
-      animation: pulseRadar 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    &.main-green {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
     }
-    &.wave2 {
-      animation: pulseRadar 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-      animation-delay: 0.9s;
+
+    &.main-purple {
+      background: rgba(139, 92, 246, 0.1);
+      color: #8b5cf6;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.2);
     }
   }
 }
 
-// Banners de Alerta Gerais
-.alert-box {
+// BOTÃO DE CHAMADA GIGANTE (UX TABLET)
+.btn-totem-call {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 24px 48px;
+  border-radius: 50px;
+  font-size: 20px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 0.88rem;
+  gap: 12px;
+  margin: 0 auto;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+  transition: transform 0.2s, background-color 0.2s;
+
+  ion-icon {
+    font-size: 26px;
+  }
+
+  &:hover {
+    background: #059669;
+    transform: scale(1.03);
+  }
+}
+
+.totem-progress {
+  max-width: 300px;
+  margin: 0 auto 32px auto;
+  border-radius: 4px;
+}
+
+.btn-totem-cancel {
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  padding: 14px 28px;
+  border-radius: 30px;
+  font-size: 15px;
   font-weight: 600;
-  text-align: left;
-  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.2s;
 
-  &.error {
-    background: #fff5f5;
-    border: 1px solid #fee2e2;
-    color: #ef4444;
-  }
-
-  &.success {
-    background: #ecfdf5;
-    border: 1px solid #d1fae5;
-    color: #065f46;
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
   }
 }
 
-// Classes utilitárias e animações
-.uppercase-input {
-  text-transform: uppercase;
+// =========================================================================
+// 💬 SUB-TELA C: CASAMENTO PERFEITO DO CHAT (MENSAGENS)
+// =========================================================================
+.totem-chat-box {
+  width: 100%;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  .chat-header {
+    background: #111827;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #374151;
+
+    h3 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+    }
+  }
 }
 
+.chat-messages-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #1a222f;
+
+  .message-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .msg-cliente {
+    background: #6366f1;
+    color: #ffffff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-atendente {
+    background: #374151;
+    color: #ffffff;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .chat-empty-state {
+    text-align: center;
+    color: #6b7280;
+    margin-top: 40px;
+    font-size: 14px;
+  }
+}
+
+// INPUT DO CHAT
+.chat-footer-input {
+  background: #111827;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #374151;
+
+  .chat-input-item {
+    flex: 1;
+    --background: #1f2937;
+    --border-radius: 10px;
+    --color: #ffffff;
+    border: 1px solid #374151;
+
+    ion-input {
+      --placeholder-color: #6b7280;
+    }
+  }
+
+  .btn-chat-send {
+    background: #6366f1;
+    color: #ffffff;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.2s;
+
+    &:hover:not([disabled]) {
+      background: #4f46e5;
+    }
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+}
+
+// RODAPÉ PARA SESSÃO DO TOTEM
+.totem-actions-footer {
+  margin-top: 24px;
+  text-align: center;
+  width: 100%;
+
+  ion-button {
+    --color: #f87171;
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+// =========================================================================
+// 🌪️ ANIMAÇÕES FLUIDAS (MICROINTERAÇÕES)
+// =========================================================================
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-.animate-pulse-custom {
-  animation: pulseCard 1.8s ease-in-out infinite;
+.animate-pulse-slow {
+  animation: pulseSlow 3s infinite ease-in-out;
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 3s infinite ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 4s infinite linear;
 }
 
 @keyframes fadeIn {
@@ -354,18 +456,17 @@ $success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%); // Verde E
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulseRadar {
-  0% {
-    transform: scale(0.5);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.3);
-    opacity: 0;
-  }
+@keyframes pulseSlow {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(16, 185, 129, 0.2); }
+  50% { transform: scale(1.04); box-shadow: 0 0 60px rgba(16, 185, 129, 0.4); }
 }
 
-@keyframes pulseCard {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(0.99); }
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(36deg); }
 }
