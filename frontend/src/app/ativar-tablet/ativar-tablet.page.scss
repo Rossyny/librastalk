@@ -185,8 +185,8 @@
 // =========================================================================
 
 .guiche-info-badge {
-  background: rgba(255, 255, 255, 0.08); // Um pouquinho mais claro para dar contraste
-  border: 1px solid rgba(255, 255, 255, 0.2); // Borda branca sutil bem definida
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 8px 18px;
   border-radius: 20px;
   margin: 40px auto 20px auto;
@@ -194,10 +194,10 @@
   font-size: 14px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: #ffffff !important; // 🔥 Garante texto 100% branco independente do ion-text
+  color: #ffffff !important;
 
   strong {
-    color: #ffffff !important; // 🔥 Garante que a tag strong herde o branco brilhante
+    color: #ffffff !important;
     font-weight: 700;
   }
 }
@@ -475,7 +475,6 @@
 // ⌨️ TECLADO VIRTUAL ACESSÍVEL (LIBRAS + TEXTO)
 // =========================================================================
 
-// Importação opcional da fonte de Libras nos assets (exemplo de implementação)
 @font-face {
   font-family: 'LibrasHand';
   src: url('/assets/fonts/libras-hand.woff2') format('woff2');
@@ -562,7 +561,6 @@
       font-weight: 700;
     }
 
-    // Área reservada para o símbolo da mão em libras
     .key-libras-hand {
       margin-top: 4px;
       color: #9ca3af;
@@ -570,13 +568,11 @@
       .libras-font::before {
         font-family: 'LibrasHand', sans-serif;
         font-size: 24px;
-        // Injeta a letra correspondente para acionar o glifo da fonte de libras
         content: attr(data-letter); 
         text-transform: lowercase;
       }
     }
 
-    // Estilizações especiais para teclas de controle
     &.key-space {
       flex: 3;
       background: #374151;
@@ -595,5 +591,36 @@
         color: #ffffff;
       }
     }
+  }
+}
+
+// =========================================================================
+// 🤟 AJUSTES DE LAYOUT E POSICIONAMENTO PARA O VLIBRAS (LADO A LADO)
+// =========================================================================
+
+/* Fixa o container global do VLibras na lateral direita sem cobrir o chat */
+div[vw] {
+  left: auto !important;
+  right: 20px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 9999 !important;
+}
+
+/* Garante que o painel do avatar abra num tamanho proporcional e bem visível */
+div[vw-plugin-wrapper] {
+  width: 38vw !important;
+  max-width: 440px !important;
+  height: 68vh !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Ajusta o container principal do Totem para não colidir com o boneco do lado direito */
+@media (min-width: 768px) {
+  .totem-container {
+    margin-left: 5% !important;
+    margin-right: auto !important;
+    max-width: 52% !important; /* Liberta ~45% do lado direito para o avatar do VLibras */
   }
 }

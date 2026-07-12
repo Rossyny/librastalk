@@ -13,13 +13,14 @@
 
   <div class="totem-container">
     
+    <!-- TELA DE ATIVAÇÃO PELO TOKEN -->
     <div *ngIf="!estaAtivado" class="activation-card animate-fade-in">
       <div class="totem-icon-box animate-bounce-slow">
         <ion-icon name="tablet-portrait-outline"></ion-icon>
       </div>
       
       <h2>Configurar Dispositivo</h2>
-      <p class="totem-subtitle">Introduz o código gerado no painel administrativo para associar este tablet a um guiché.</p>
+      <p class="totem-subtitle">Introduza o código gerado no painel administrativo para associar este tablet a um guichê.</p>
 
       <div *ngIf="erroMensagem" class="alert-box error animate-fade-in">
         <ion-icon name="alert-circle-outline"></ion-icon>
@@ -48,20 +49,20 @@
       </button>
     </div>
 
+    <!-- ÁREA DE OPERAÇÃO DO TOTEM -->
     <div *ngIf="estaAtivado" class="w-full">
       
       <div class="guiche-info-badge animate-fade-in">
-        
-          <strong>{{ guicheDados?.numeroIdentificador || 'Guichê Ativo' }}</strong>
-        
+        <strong>{{ guicheDados?.numeroIdentificador || 'Guichê Ativo' }}</strong>
       </div>
 
+      <!-- TELA 1: TELA DE BOAS-VINDAS / SOLICITAR ATENDIMENTO -->
       <div *ngIf="!chamandoAtendente && !chatConectado" class="totem-welcome-box animate-fade-in">
         <div class="totem-hero-icon main-green animate-pulse-slow">
           <ion-icon name="people-outline"></ion-icon>
         </div>
         <h1>Precisa de Atendimento em Libras?</h1>
-        <p class="totem-subtitle">Toque no botão abaixo para conversar com um atendente em libras.</p>
+        <p class="totem-subtitle">Toque no botão abaixo para conversar com um atendente em Libras.</p>
         
         <button (click)="alternarChamada()" class="btn-totem-call">
           <ion-icon name="videocam-outline"></ion-icon>
@@ -69,6 +70,7 @@
         </button>
       </div>
 
+      <!-- TELA 2: FILA DE ESPERA -->
       <div *ngIf="chamandoAtendente && !chatConectado" class="totem-welcome-box animate-fade-in">
         <div class="totem-hero-icon main-purple animate-spin-slow">
           <ion-icon name="volume-mediumOutline"></ion-icon>
@@ -83,12 +85,14 @@
         </button>
       </div>
 
+      <!-- TELA 3: CAIXA DE CHAT ATIVO -->
       <div *ngIf="chatConectado" class="totem-chat-box animate-fade-in">
         <div class="chat-header">
           <div class="status-indicator online"></div>
           <h3>Intérprete Conectado</h3>
         </div>
 
+        <!-- MENSAGENS -->
         <div #scrollContainer class="chat-messages-body">
           <div *ngFor="let msg of mensagens" 
                [ngClass]="{'msg-cliente': msg.remetente === 'CLIENTE', 'msg-atendente': msg.remetente === 'ATENDENTE'}" 
@@ -101,12 +105,15 @@
           </div>
         </div>
 
+        <!-- ENTRADA DE TEXTO -->
         <div class="chat-footer-input">
           <ion-item lines="none" class="chat-input-item">
             <ion-input 
               type="text" 
               placeholder="Escreva uma mensagem..." 
               [(ngModel)]="textoMensagem"
+              (click)="abrirTeclado()"
+              (ionFocus)="abrirTeclado()"
               (keyup.enter)="enviarMensagemWS()">
             </ion-input>
           </ion-item>
@@ -116,12 +123,40 @@
         </div>
       </div>
 
+      <!-- ⌨️ TECLADO VIRTUAL DO TOTEM (ACESSÍVEL) -->
+      <div *ngIf="chatConectado && exibirTecladoVirtual" class="totem-keyboard-container animate-fade-in">
+        <div class="keyboard-header">
+          <span>Teclado de Acessibilidade</span>
+          <button class="btn-close-keyboard" (click)="fecharTeclado()">Fechar ✖</button>
+        </div>
+
+        <div class="keyboard-body">
+          <div *ngFor="let linha of linhasTeclado" class="keyboard-row">
+            <button 
+              *ngFor="let tecla of linha" 
+              class="keyboard-key"
+              [ngClass]="{'key-space': tecla === ' ', 'key-backspace': tecla === 'BACKSPACE'}"
+              (click)="digitarTecla(tecla)">
+              
+              <span *ngIf="tecla !== ' ' && tecla !== 'BACKSPACE'" class="key-text">{{ tecla }}</span>
+              <span *ngIf="tecla !== ' ' && tecla !== 'BACKSPACE'" class="key-libras-hand">
+                <i class="libras-font" [attr.data-letter]="tecla"></i>
+              </span>
+
+              <span *ngIf="tecla === ' '">ESPAÇO</span>
+              <span *ngIf="tecla === 'BACKSPACE'">⌫ APAGAR</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÃO DE ENCERRAMENTO NO RODAPÉ 
       <div *ngIf="atendimentoAtivo" class="totem-actions-footer animate-fade-in">
         <ion-button color="danger" fill="clear" (click)="encerrarPeloTotem()">
           <ion-icon slot="start" name="close-circle-outline"></ion-icon>
           Encerrar Sessão
         </ion-button>
-      </div>
+      </div>-->
 
     </div>
   </div>

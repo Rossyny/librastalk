@@ -48,13 +48,14 @@
 
     <div class="section-title mt-6 animate-fade-in">
       <h2>🛠️ Centro de Controle Operacional</h2>
-      <p>Gerencie o fluxo de acessibilidade, adicione funcionários e gere tokens para os tablets físicos.</p>
+      <p>Gerencie o fluxo de acessibilidade, adicione funcionários e configure os guichês dos tablets físicos.</p>
     </div>
 
     <ion-grid class="ion-no-padding mt-4">
       <ion-row>
         
-        <ion-col size="12" sizeMd="4">
+        <!-- Card 1: Equipe de Suporte -->
+        <ion-col size="12" sizeMd="6">
           <ion-card class="action-card blue-theme">
             <ion-card-header>
               <div class="icon-wrapper">
@@ -73,39 +74,21 @@
           </ion-card>
         </ion-col>
 
-        <ion-col size="12" sizeMd="4">
+        <!-- Card 2: Guichês & Caixas (Gera o Token Automático) -->
+        <ion-col size="12" sizeMd="6">
           <ion-card class="action-card blue-theme">
             <ion-card-header>
               <div class="icon-wrapper">
                 <ion-icon name="hardware-chip-outline"></ion-icon>
               </div>
               <ion-card-title>Guichês & Caixas</ion-card-title>
-              <span class="card-subtitle">Pontos Físicos</span>
+              <span class="card-subtitle">Pontos Físicos & Tokens</span>
             </ion-card-header>
             
             <ion-card-content>
-              <p>Mapeie a estrutura física do seu estabelecimento (ex: Caixa Rápido, Balcão Central) para identificar a origem das chamadas.</p>
+              <p>Mapeie a estrutura física do seu estabelecimento (ex: Caixa Rápido, Balcão Central) para gerar a chave de ativação do tablet.</p>
               <ion-button expand="block" (click)="irParaGerenciarGuiches()" mode="ios">
-                Configurar Pontos
-              </ion-button>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
-
-        <ion-col size="12" sizeMd="4">
-          <ion-card class="action-card token-theme">
-            <ion-card-header>
-              <div class="icon-wrapper">
-                <ion-icon name="key-outline"></ion-icon>
-              </div>
-              <ion-card-title>Tokens de Ativação</ion-card-title>
-              <span class="card-subtitle">Segurança de Equipamento</span>
-            </ion-card-header>
-            
-            <ion-card-content>
-              <p>Gere chaves numéricas seguras de uso único para sincronizar e autorizar novos tablets a rodarem o app no totem.</p>
-              <ion-button expand="block" (click)="gerarNovoToken()" mode="ios">
-                Gerar Novo Token
+                Configurar Ponto & Gerar Token
               </ion-button>
             </ion-card-content>
           </ion-card>

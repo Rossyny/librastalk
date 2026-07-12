@@ -74,4 +74,29 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
+
+    /**
+     * 🔥 NOVO: Endpoint para listar todos os usuários
+     * URL: GET http://localhost:8080/api/usuarios
+     */
+    @GetMapping
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<?> listarTodos() {
+        return ResponseEntity.ok(usuarioRepository.findAll());
+    }
+
+    /**
+     * 🔥 NOVO: Endpoint para retornar a contagem exata de atendentes no banco
+     * URL: GET http://localhost:8080/api/usuarios/contar-atendentes
+     */
+    @GetMapping("/contar-atendentes")
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<?> contarAtendentes() {
+        try {
+            long total = usuarioRepository.countByPerfil(com.librastalk.backend.model.Perfil.ATENDENTE);
+            return ResponseEntity.ok(Map.of("totalAtendentes", total));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
 }

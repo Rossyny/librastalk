@@ -82,10 +82,14 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
   private statusSubscription: StompSubscription | null = null;
 
   private readonly API_ATENDIMENTO_URL = 'http://localhost:8080/api/atendimentos';
-
   private readonly API_BASE = 'http://localhost:8080/api';
 
-  constructor(private router: Router, private http: HttpClient, private wsService: WebSocketService, private vlibrasService: VlibrasService) {
+  constructor(
+    private router: Router, 
+    private http: HttpClient, 
+    private wsService: WebSocketService, 
+    private vlibrasService: VlibrasService
+  ) {
     addIcons({ 
       tabletPortraitOutline, 
       keyOutline, 
@@ -102,21 +106,29 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.verificarConfiguracaoPrevia();
-    this.vlibrasService.inicializar();
+    // Verifica se o equipamento já estava previamente ativo no navegador
+    const tabletSalvo = localStorage.getItem('librastalk_tablet_ativo');
+    if (tabletSalvo) {
+      this.guicheDados = JSON.parse(tabletSalvo);
+      this.equipamentoConfigurado = true;
+    }
+
+    // 🔥 FORÇAR ABERTURA AUTOMÁTICA DO VLIBRAS NO TOTEM
+    setTimeout(() => {
+      try {
+        const botaoVlibras = document.querySelector('[vw-access-button]') as HTMLElement;
+        if (botaoVlibras) {
+          console.log('Totem: Forçando abertura automática do widget VLibras...');
+          botaoVlibras.click();
+        }
+      } catch (e) {
+        console.error('Totem: Erro ao tentar abrir o VLibras automaticamente:', e);
+      }
+    }, 2500);
   }
 
   ngOnDestroy() {
     this.desconectarChatAtivo();
-    this.vlibrasService.destruir();
-  }
-
-  verificarConfiguracaoPrevia() {
-    const salvo = localStorage.getItem('librastalk_tablet_ativo');
-    if (salvo) {
-      this.guicheDados = JSON.parse(salvo);
-      this.equipamentoConfigurado = true;
-    }
   }
 
   voltarAoPortal() {
@@ -173,11 +185,9 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
   }
 
   alternarChamada() {
-    // Se já estiver na fila (tela roxa) ou conversando (chat ativo), o botão serve para ENCERRAR
     if (this.chamandoAtendente || this.chatConectado) {
       this.encerrarPeloTotem();
     } else {
-      // 🔥 CORREÇÃO: Se o totem estiver livre, o clique no botão deve INICIAR a solicitação!
       this.solicitarAtendimento();
     }
   }
@@ -211,14 +221,12 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
       this.statusSubscription = this.wsService.subscrever(`/topic/atendimento/${atendimentoId}`, (atendimentoAtualizado: any) => {
         console.log('⚡ Atualização de Atendimento recebida no Totem:', atendimentoAtualizado);
 
-        // Cenário 1: O Atendente aceitou o chamado no painel (Muda de AGUARDANDO para EM_ANDAMENTO)
         if (atendimentoAtualizado.status === 'EM_ANDAMENTO' && !this.chatConectado) {
           console.log('🎉 Atendente aceitou o chamado! Mudando estados e abrindo chat no Totem...');
-          this.chamandoAtendente = false; // 🔥 Correção aqui: Desliga a tela roxa de espera imediatamente
+          this.chamandoAtendente = false;
           this.ativarJanelaConversaWS(atendimentoId);
         }
 
-        // Cenário 2: O atendimento foi concluído pelo atendente
         if (atendimentoAtualizado.status === 'CONCLUIDO') {
           console.log('🚪 Atendimento finalizado pelo intérprete. Resetando Totem...');
           alert('Atendimento concluído com sucesso. Obrigado!');
@@ -232,7 +240,7 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
    * Ativa a tela de conversa por chat e subscreve no fluxo de mensagens
    */
   ativarJanelaConversaWS(atendimentoId: number) {
-    this.chamandoAtendente = false; // 🔥 Redundância de segurança para garantir a limpeza da tela de espera
+    this.chamandoAtendente = false;
     this.chatConectado = true;
     
     this.wsService.conectar(atendimentoId);
@@ -245,9 +253,10 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
         this.mensagens.push(novaMsg);
         this.rolarChatParaBaixo();
 
-        // 🔥 NOVO: Força o boneco do VLibras a traduzir a mensagem se ela vier do ATENDENTE
-        if (novaMsg.remetente === 'ATENDENTE' && novaMsg.conteudoTexto) {
-          this.traduzirTextoParaLibras(novaMsg.conteudoTexto);
+        // 🤟 TRADUÇÃO AUTOMÁTICA DA MENSAGEM DO ATENDENTE NO VLIBRAS
+        const textoParaTraduzir = novaMsg.conteudoTexto || (novaMsg as any).texto;
+        if (novaMsg.remetente === 'ATENDENTE' && textoParaTraduzir) {
+          this.traduzirTextoParaLibras(textoParaTraduzir);
         }
       }
     });
@@ -264,9 +273,6 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
       : 'Deseja realmente desistir da fila de espera?';
 
     if (confirm(mensagemConfirmacao)) {
-      
-      // 🚨 CORREÇÃO: Só envia o comando via WebSocket se o chat REALMENTE estiver conectado!
-      // Se estiver apenas na fila de espera, pula essa parte para não travar o botão.
       if (this.chatConectado) {
         try {
           this.wsService.enviarMensagem(this.atendimentoAtualId, 'CLIENTE', 'SESSAO_ENCERRADA_PELO_CLIENTE');
@@ -275,7 +281,6 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
         }
       }
 
-      // Executa o POST para o Java atualizar o banco de dados normalmente
       this.http.post(`${this.API_ATENDIMENTO_URL}/finalizar/${this.atendimentoAtualId}`, {}).subscribe({
         next: () => {
           console.log('Totem: Atendimento encerrado com sucesso no servidor.');
@@ -315,7 +320,7 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
     this.guicheDados = null;
     this.equipamentoConfigurado = false;
     this.tokenInput = '';
-    this.vlibrasService.exibirWidget(false); // Oculta o widget
+    this.vlibrasService.exibirWidget(false);
   }
 
   private rolarChatParaBaixo() {
@@ -345,55 +350,68 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
 
   /**
    * Comunica diretamente com a instância do Widget do VLibras na janela
+   * Mantém o avatar ativo e visível sem abrir o menu de configurações.
    */
   private traduzirTextoParaLibras(texto: string) {
-    try {
-      // Força a limpeza de espaços e conversão rápida para string primitiva
-      const textoTratado = String(texto).trim();
-      if (!textoTratado) return;
+    setTimeout(() => {
+      try {
+        const textoTratado = String(texto).trim();
+        if (!textoTratado) return;
 
-      // 🔥 1. FORÇA A VISIBILIDADE E EXPANSÃO SE O WIDGET ESTIVER MINIMIZADO
-      // O botão azul padrão do VLibras possui o atributo [vw-access-button]
-      const btnAcesso = document.querySelector('[vw-access-button]');
-      // O wrapper ganha a classe '.active' quando o boneco está aberto na tela
-      const widgetAberto = document.querySelector('.vw-plugin-wrapper.active');
+        // 1. VERIFICA SE O AVATAR JÁ ESTÁ CARREGADO NO DOM (Evita clicar no botão e abrir o menu)
+        const pluginWrapper = document.querySelector('[vw-plugin-wrapper]');
+        const isWrapperVisible = pluginWrapper && (
+          pluginWrapper.classList.contains('active') || 
+          window.getComputedStyle(pluginWrapper).display !== 'none'
+        );
 
-      if (btnAcesso && !widgetAberto) {
-        console.log('VLibras Talk: Forçando abertura visual do avatar...');
-        (btnAcesso as HTMLElement).click();
+        // Só clica no botão se o plugin realmente NÃO estiver visível/iniciado no DOM
+        if (!isWrapperVisible) {
+          const btnAcesso = document.querySelector('[vw-access-button]') as HTMLElement;
+          if (btnAcesso) {
+            console.log('VLibras Talk: Avatar fechado. Abrindo...');
+            btnAcesso.click();
+          }
+        }
+
+        // 2. DISPARO DE TRADUÇÃO DIRETA (Sem interagir com os botões de menu)
+        // @ts-ignore
+        const widget = window.vlibrasWidget;
+
+        // Abordagem A: Instância Global Oficial do Widget
+        if (widget && typeof widget.translate === 'function') {
+          console.log('VLibras Talk: Traduzindo via API oficial do widget...');
+          widget.translate(textoTratado);
+          return;
+        }
+
+        // Abordagem B: Evento Customizado do Plugin do Governo
+        console.log('VLibras Talk: Disparando evento customizado vp-widget-translate...');
+        const eventoTraducao = new CustomEvent('vp-widget-translate', {
+          detail: { text: textoTratado }
+        });
+        window.dispatchEvent(eventoTraducao);
+
+        // Abordagem C: Injeção direta no campo de texto interno do player do VLibras
+        const vlibrasInput = document.querySelector('[vw-plugin-wrapper] input.vp-input') as HTMLInputElement ||
+                             document.querySelector('.vw-plugin-wrapper input') as HTMLInputElement;
+
+        if (vlibrasInput) {
+          console.log('VLibras Talk: Traduzindo via input interno do player...');
+          vlibrasInput.value = textoTratado;
+          vlibrasInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+          // Clica exclusivamente no botão interno de TRADUZIR (com a classe vp-action-icon)
+          const btnTraduzirInterno = document.querySelector('[vw-plugin-wrapper] .vp-action-icon') as HTMLButtonElement ||
+                                     document.querySelector('.vw-plugin-wrapper button') as HTMLButtonElement;
+          
+          if (btnTraduzirInterno) {
+            btnTraduzirInterno.click();
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao acionar a tradução automática do VLibras:', error);
       }
-
-      // @ts-ignore
-      const widget = window.vlibrasWidget;
-
-      // Abordagem A: Pelo objeto do Widget principal instanciado
-      if (widget && typeof widget.translate === 'function') {
-        console.log('VLibras Talk: Traduzindo via API do widget...');
-        widget.translate(textoTratado);
-        return;
-      }
-
-      // Abordagem B: Fallback injetando o texto direto no input oculto do plugin do VLibras
-      const vlibrasInput = document.querySelector('.vw-plugin-wrapper input') as HTMLInputElement || 
-                           document.querySelector('[vw-plugin-wrapper] input') as HTMLInputElement;
-
-      if (vlibrasInput) {
-        console.log('VLibras Talk: Traduzindo via input de Fallback do DOM...');
-        vlibrasInput.value = textoTratado;
-        
-        // Dispara o evento de "input" para o widget interceptar o texto
-        const eventoInput = new Event('input', { bubbles: true });
-        vlibrasInput.dispatchEvent(eventoInput);
-        
-        // Simula o clique de envio no botão interno do widget
-        const btnEnviar = document.querySelector('.vw-plugin-wrapper button') as HTMLButtonElement;
-        if (btnEnviar) btnEnviar.click();
-        return;
-      }
-
-      console.warn('VLibras ainda não está totalmente pronto no DOM ou na janela global.');
-    } catch (error) {
-      console.error('Erro ao acionar a tradução automática do VLibras:', error);
-    }
+    }, 300);
   }
 }
