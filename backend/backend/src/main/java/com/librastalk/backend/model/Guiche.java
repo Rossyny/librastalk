@@ -24,6 +24,9 @@ public class Guiche {
     @Column(nullable = false, unique = true)
     private String tokenAcesso;
 
+    @Column(name = "ativo", nullable = false)
+    private Boolean ativo = false;
+
     @ManyToOne
     @JoinColumn(name = "estabelecimento_id", nullable = false)
     private Estabelecimento estabelecimento;

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -43,26 +43,24 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', 'BACKSPACE']
   ];
 
-  // Controladores de Fluxo de Telas (Oficiais)
+  // Controladores de Fluxo de Telas
   equipamentoConfigurado: boolean = false;
   etapaInsercaoToken: boolean = false;
   chamandoAtendente: boolean = false;
   chatConectado: boolean = false;
 
-  // Inputs e dados locais (Oficiais)
+  // Inputs e dados locais
   tokenInput: string = '';
   guicheDados: any = null;
   mensagemErro: string = '';
   carregando: boolean = false;
 
-  // Dados do Atendimento Ativo (Oficiais)
+  // Dados do Atendimento Ativo
   atendimentoAtualId: number | null = null;
   mensagens: MensagemChat[] = [];
   textoMensagem: string = '';
 
-  // =========================================================================
-  // 🔄 METODOS E GETTERS DE COMPATIBILIDADE COM O TEU HTML
-  // =========================================================================
+  // Getters e Setters de Compatibilidade
   get estaAtivado(): boolean { return this.equipamentoConfigurado; }
   set estaAtivado(val: boolean) { this.equipamentoConfigurado = val; }
 
@@ -74,9 +72,7 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
 
   sucessoMensagem: string = ''; 
 
-  // Controla a exibição do botão de encerramento no rodapé
   get atendimentoAtivo(): boolean { return this.chatConectado || this.chamandoAtendente; }
-  // =========================================================================
 
   private chatSubscription: Subscription | null = null;
   private statusSubscription: StompSubscription | null = null;
@@ -100,20 +96,18 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
       peopleOutline,
       volumeMediumOutline,
       sendOutline,
-      closeCircleOutline,
-      vlibras: 'https://vlibras.gov.br/app/vlibras-plugin.js'
+      closeCircleOutline
     });
   }
 
   ngOnInit() {
-    // Verifica se o equipamento já estava previamente ativo no navegador
     const tabletSalvo = localStorage.getItem('librastalk_tablet_ativo');
     if (tabletSalvo) {
       this.guicheDados = JSON.parse(tabletSalvo);
       this.equipamentoConfigurado = true;
     }
 
-    // 🔥 FORÇAR ABERTURA AUTOMÁTICA DO VLIBRAS NO TOTEM
+    // Abertura automática do VLibras
     setTimeout(() => {
       try {
         const botaoVlibras = document.querySelector('[vw-access-button]') as HTMLElement;
@@ -236,9 +230,6 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  /**
-   * Ativa a tela de conversa por chat e subscreve no fluxo de mensagens
-   */
   ativarJanelaConversaWS(atendimentoId: number) {
     this.chamandoAtendente = false;
     this.chatConectado = true;
@@ -253,7 +244,6 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
         this.mensagens.push(novaMsg);
         this.rolarChatParaBaixo();
 
-        // 🤟 TRADUÇÃO AUTOMÁTICA DA MENSAGEM DO ATENDENTE NO VLIBRAS
         const textoParaTraduzir = novaMsg.conteudoTexto || (novaMsg as any).texto;
         if (novaMsg.remetente === 'ATENDENTE' && textoParaTraduzir) {
           this.traduzirTextoParaLibras(textoParaTraduzir);
@@ -308,13 +298,48 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
     this.atendimentoAtualId = null;
     this.mensagens = [];
 
-    if (this.chatSubscription) this.chatSubscription.unsubscribe();
-    if (this.statusSubscription) this.statusSubscription.unsubscribe();
+    if (this.chatSubscription) {
+      this.chatSubscription.unsubscribe();
+      this.chatSubscription = null;
+    }
+    
+    if (this.statusSubscription) {
+      if (typeof this.statusSubscription.unsubscribe === 'function') {
+        this.statusSubscription.unsubscribe();
+      }
+      this.statusSubscription = null;
+    }
 
     this.wsService.desconectar();
   }
 
   desativarEquipamento() {
+      if (!this.guicheDados || !this.guicheDados.id) {
+        this.limparDadosLocaisEInterface();
+        return;
+      }
+
+      this.carregando = true;
+
+      // Monta o body exatamente como o seu método Java espera: { "id": guicheId }
+      const payload = { id: this.guicheDados.id };
+
+      this.http.post(`${this.API_BASE}/guiches/desconectar`, payload).subscribe({
+        next: (resposta: any) => {
+          console.log('Totem: Guichê desconectado com sucesso no backend:', resposta);
+          this.carregando = false;
+          this.limparDadosLocaisEInterface();
+        },
+        error: (err) => {
+          console.error('Erro ao desconectar guichê no servidor:', err);
+          this.carregando = false;
+          // Mesmo se houver erro de rede, limpa a interface do tablet para não travar o usuário
+          this.limparDadosLocaisEInterface();
+        }
+      });
+    }
+
+  private limparDadosLocaisEInterface() {
     this.desconectarChatAtivo();
     localStorage.removeItem('librastalk_tablet_ativo');
     this.guicheDados = null;
@@ -348,24 +373,18 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Comunica diretamente com a instância do Widget do VLibras na janela
-   * Mantém o avatar ativo e visível sem abrir o menu de configurações.
-   */
   private traduzirTextoParaLibras(texto: string) {
     setTimeout(() => {
       try {
         const textoTratado = String(texto).trim();
         if (!textoTratado) return;
 
-        // 1. VERIFICA SE O AVATAR JÁ ESTÁ CARREGADO NO DOM (Evita clicar no botão e abrir o menu)
         const pluginWrapper = document.querySelector('[vw-plugin-wrapper]');
         const isWrapperVisible = pluginWrapper && (
           pluginWrapper.classList.contains('active') || 
           window.getComputedStyle(pluginWrapper).display !== 'none'
         );
 
-        // Só clica no botão se o plugin realmente NÃO estiver visível/iniciado no DOM
         if (!isWrapperVisible) {
           const btnAcesso = document.querySelector('[vw-access-button]') as HTMLElement;
           if (btnAcesso) {
@@ -374,25 +393,21 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
           }
         }
 
-        // 2. DISPARO DE TRADUÇÃO DIRETA (Sem interagir com os botões de menu)
         // @ts-ignore
         const widget = window.vlibrasWidget;
 
-        // Abordagem A: Instância Global Oficial do Widget
         if (widget && typeof widget.translate === 'function') {
           console.log('VLibras Talk: Traduzindo via API oficial do widget...');
           widget.translate(textoTratado);
           return;
         }
 
-        // Abordagem B: Evento Customizado do Plugin do Governo
         console.log('VLibras Talk: Disparando evento customizado vp-widget-translate...');
         const eventoTraducao = new CustomEvent('vp-widget-translate', {
           detail: { text: textoTratado }
         });
         window.dispatchEvent(eventoTraducao);
 
-        // Abordagem C: Injeção direta no campo de texto interno do player do VLibras
         const vlibrasInput = document.querySelector('[vw-plugin-wrapper] input.vp-input') as HTMLInputElement ||
                              document.querySelector('.vw-plugin-wrapper input') as HTMLInputElement;
 
@@ -401,7 +416,6 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
           vlibrasInput.value = textoTratado;
           vlibrasInput.dispatchEvent(new Event('input', { bubbles: true }));
 
-          // Clica exclusivamente no botão interno de TRADUZIR (com a classe vp-action-icon)
           const btnTraduzirInterno = document.querySelector('[vw-plugin-wrapper] .vp-action-icon') as HTMLButtonElement ||
                                      document.querySelector('.vw-plugin-wrapper button') as HTMLButtonElement;
           

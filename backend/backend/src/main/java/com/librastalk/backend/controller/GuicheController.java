@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/guiches")
@@ -50,11 +51,9 @@ public class GuicheController {
         }
     }
     /**
-     * Endpoint para validar o token inserido no tablet e retornar os dados do guichê
-     * URL: POST http://localhost:8080/api/guiches/validar-token
+     * Endpoint para validar o token no tablet e MARCAR COMO ATIVO no banco
      */
     @PostMapping("/validar-token")
-    @CrossOrigin(origins = "*") // Garante o CORS isolado caso o global falhe
     public ResponseEntity<?> validarToken(@RequestBody Map<String, String> body) {
         try {
             String token = body.get("token");
@@ -62,35 +61,64 @@ public class GuicheController {
                 return ResponseEntity.badRequest().body(Map.of("erro", "O token não foi informado."));
             }
 
-            System.out.println("===> Tentando validar o token do tablet: " + token);
-
-            // Busca o guichê pelo token de acesso no banco de dados
             Guiche guiche = guicheRepository.findByTokenAcesso(token.trim())
                     .orElseThrow(() -> new RuntimeException("Código de ativação inválido ou não encontrado."));
 
-            // Blindagem contra NullPointerException caso algum relacionamento esteja vazio no banco
-            String identificacao = guiche.getIdentificacao() != null ? guiche.getIdentificacao() : "Guichê sem identificação";
-            String localizacao = "Estabelecimento Não Informado";
-            
-            if (guiche.getEstabelecimento() != null && guiche.getEstabelecimento().getNome() != null) {
-                localizacao = guiche.getEstabelecimento().getNome();
-            }
+            // 🔥 MARCA O GUICHÊ COMO ATIVO AO CONECTAR O TABLET
+            guiche.setAtivo(true);
+            guicheRepository.save(guiche);
 
-            // Criação do map dinâmico para aceitar variações com segurança
             Map<String, Object> resposta = new java.util.HashMap<>();
             resposta.put("id", guiche.getId());
-            resposta.put("numeroIdentificador", identificacao);
-            resposta.put("localizacao", localizacao);
+            resposta.put("numeroIdentificador", guiche.getIdentificacao() != null ? guiche.getIdentificacao() : "Guichê sem identificação");
+            resposta.put("localizacao", guiche.getEstabelecimento() != null ? guiche.getEstabelecimento().getNome() : "Estabelecimento Não Informado");
+            resposta.put("ativo", guiche.getAtivo());
 
-            System.out.println("===> Token validado com sucesso para o guichê ID: " + guiche.getId());
             return ResponseEntity.ok(resposta);
 
         } catch (Exception e) {
-            // Imprime o erro real no terminal da sua IDE (Eclipse/IntelliJ)
-            System.err.println("❌ ERRO AO VALIDAR TOKEN: " + e.getMessage());
-            e.printStackTrace(); 
-            
             return ResponseEntity.status(404).body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    /**
+     * Endpoint para o Gerente consultar a quantidade ou lista de Guichês ATIVOS
+     * URL: GET http://localhost:8080/api/guiches/ativos
+     */
+    @GetMapping("/ativos")
+    public ResponseEntity<List<Guiche>> listarAtivos() {
+        List<Guiche> guichesAtivos = guicheRepository.findByAtivoTrue();
+        return ResponseEntity.ok(guichesAtivos);
+    }
+
+    /**
+     * Endpoint para DESATIVAR o guichê quando o tablet fecha a sessão ou faz logout
+     * URL: POST http://localhost:8080/api/guiches/desconectar
+     */
+    @PostMapping("/desconectar")
+    public ResponseEntity<?> desconectar(@RequestBody Map<String, Object> body) {
+        try {
+            Object idObj = body.get("id");
+            if (idObj == null) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "ID do guichê não informado."));
+            }
+
+            // Converte com segurança sem reatribuir variável local
+            Long guicheId = ((Number) idObj).longValue();
+
+            Guiche guiche = guicheRepository.findById(guicheId)
+                    .orElseThrow(() -> new RuntimeException("Guichê não encontrado com ID: " + guicheId));
+
+            // 🛑 MARCA O GUICHÊ COMO INATIVO NO BANCO
+            guiche.setAtivo(false);
+            guicheRepository.save(guiche);
+
+            System.out.println("===> Guichê ID " + guicheId + " foi DESCONECTADO e marcado como inativo.");
+            return ResponseEntity.ok(Map.of("mensagem", "Guichê desconectado com sucesso."));
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao desconectar guichê: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
 }

@@ -13,6 +13,7 @@ import {
   briefcaseOutline, logOutOutline, peopleOutline, 
   desktopOutline, personAddOutline, hardwareChipOutline 
 } from 'ionicons/icons';
+import { ViewWillEnter } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -53,6 +54,11 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.carregarDadosSessao();
+    this.carregarIndicadores();
+  }
+
+  // 🔥 Este método do Ionic roda SEMPRE que o gerente entra/volta para esta tela
+  ionViewWillEnter() {
     this.carregarIndicadores();
   }
 
@@ -117,21 +123,17 @@ export class HomePage implements OnInit {
           this.totalAtendentes = res.totalAtendentes;
         }
       },
-      error: (err) => {
-        console.error('Erro ao buscar total de atendentes:', err);
-      }
+      error: (err) => console.error('Erro ao buscar total de atendentes:', err)
     });
 
-    // Busca os guichês cadastrados
-    this.http.get<any[]>(`${this.API_BASE}/guiches`).subscribe({
-      next: (guiches) => {
-        if (Array.isArray(guiches)) {
-          this.totalGuiches = guiches.length;
+    // 🔥 Busca apenas os guichês que estão ATIVOS (ativo = true) no banco
+    this.http.get<any[]>(`${this.API_BASE}/guiches/ativos`).subscribe({
+      next: (guichesAtivos) => {
+        if (Array.isArray(guichesAtivos)) {
+          this.totalGuiches = guichesAtivos.length;
         }
       },
-      error: (err) => {
-        console.error('Erro ao buscar total de guichês:', err);
-      }
+      error: (err) => console.error('Erro ao buscar guichês ativos:', err)
     });
   }
 
