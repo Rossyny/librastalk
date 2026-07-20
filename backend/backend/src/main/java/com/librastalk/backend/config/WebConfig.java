@@ -12,10 +12,13 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOriginPatterns(
                     "http://localhost:*",
-                    "https://librastalk.visyongeek.com"
+                    "https://librastalk.visyongeek.com",
+                    "https://librastalk.visyongeek.com/"
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .exposedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600); // Guarda a autorização por 1 hora sem precisar refazer a checagem OPTIONS toda hora
     }
 }
