@@ -17,6 +17,7 @@ import {
 import { WebSocketService, MensagemChat } from '../services/websocket.service';
 import { Subscription } from 'rxjs';
 import { StompSubscription } from '@stomp/stompjs';
+import { environment } from '../../environments/environment'; // <-- IMPORTANTE: Conexão com o ambiente dinâmico
 
 export interface ChamadoEntrante {
   id: number;
@@ -56,6 +57,7 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
 
   atendenteNome: string = '';
   atendentePerfil: string = 'Atendente de Caixa';
+  atendenteId: number = 2; // ID padrão de fallback caso não encontre no localStorage
 
   estaDisponivel: boolean = true;
   atendimentoAtivo: boolean = false;
@@ -65,12 +67,11 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
   textoMensagem: string = '';
 
   private chatSubscription: Subscription | null = null;
-  // 🔥 Guarda a referência da inscrição da fila para cancelar no OnDestroy
   private filaSubscription: StompSubscription | null = null;
 
-  private readonly API_ATENDIMENTOS = 'http://localhost:8080/api/atendimentos';
+  // Substituído o texto estático de localhost pelas variáveis globais de ambiente
+  private readonly API_ATENDIMENTOS = `${environment.apiUrl}/api/atendimentos`;
 
-  // Começa vazio para exibir apenas o que vier dinamicamente do ecossistema librastalk!
   chamados: ChamadoEntrante[] = [];
 
   constructor(private router: Router, private http: HttpClient, private wsService: WebSocketService) {
@@ -89,12 +90,8 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.carregarDadosDoAtendente();
-    // 1. Carrega chamados que já estejam aguardando no banco (Opcional, se o REST/fila existir)
     this.carregarFilaGeralREST();
-
-    // 2. Dispara a conexão e assina a fila em tempo real
     this.conectarEFilarWebSocket();
-    
   }
 
   ngOnDestroy() {
@@ -103,29 +100,28 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
   }
 
   carregarDadosDoAtendente() {
-    // 1. Tenta pegar o ID direto do localStorage (caso use a chave avulsa)
-    let usuarioId = localStorage.getItem('usuarioId') || localStorage.getItem('id_usuario');
+    let usuarioIdStr = localStorage.getItem('usuarioId') || localStorage.getItem('id_usuario');
 
-    // 🌟 CORREÇÃO CIRÚRGICA: Alinhado com a chave do seu AuthService ('librastalk_sessao')
     const usuarioSalvo = localStorage.getItem('librastalk_sessao');
     if (usuarioSalvo) {
       try {
         const obj = JSON.parse(usuarioSalvo);
-        if (obj && obj.id) usuarioId = obj.id.toString();
+        if (obj && obj.id) usuarioIdStr = obj.id.toString();
       } catch (e) {
         console.error('Erro ao fazer parse do usuário do localStorage', e);
       }
     }
 
-    // 2. Se mesmo assim não encontrar nenhum ID (fallback de segurança)
-    if (!usuarioId) {
+    if (!usuarioIdStr) {
       console.warn('Painel: Nenhum ID de atendente encontrado no localStorage. Usando ID 2 como fallback.');
-      usuarioId = '2'; 
+      usuarioIdStr = '2'; 
     }
 
-    console.log(`Painel: Buscando dados do atendente ID ${usuarioId} no banco de dados...`);
+    this.atendenteId = Number(usuarioIdStr);
+    console.log(`Painel: Buscando dados do atendente ID ${this.atendenteId} no banco de dados...`);
 
-    this.http.get<any>(`http://localhost:8080/api/usuarios/${usuarioId}`).subscribe({
+    // Substituído a URL estática por environment.apiUrl
+    this.http.get<any>(`${environment.apiUrl}/api/usuarios/${this.atendenteId}`).subscribe({
       next: (usuarioDoBanco) => {
         this.atendenteNome = usuarioDoBanco.nome;
         
@@ -158,13 +154,9 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * 🔥 Conecta globalmente e escuta a fila de chamados do Totem
-   */
   conectarEFilarWebSocket() {
     this.wsService.conectarGlobalSeNecessario();
 
-    // Dá um pequeno delay para garantir o handshake do STOMP antes da inscrição
     setTimeout(() => {
       this.filaSubscription = this.wsService.subscrever('/topic/fila', (dadosAtendimento: any) => {
         console.log('⚡ Nova solicitação recebida via WS no Painel:', dadosAtendimento);
@@ -174,7 +166,6 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
           
           if (!jaExiste) {
             const novoChamado = this.mapearObjetoParaInterface(dadosAtendimento);
-            // Empurra para o topo do array visual do painel instantaneamente
             this.chamados.unshift(novoChamado);
           }
         }
@@ -182,9 +173,6 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  /**
-   * Transforma a entidade Atendimento vinda do Java no modelo estrutural da UI
-   */
   private mapearObjetoParaInterface(atend: any): ChamadoEntrante {
     return {
       id: atend.id,
@@ -203,9 +191,10 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
     const chamadoEncontrado = this.chamados.find(c => c.id === chamadoId);
     if (!chamadoEncontrado) return;
 
+    // Envia dinamicamente o ID do atendente autenticado no sistema
     const payload = {
       atendimentoId: chamadoId,
-      usuarioId: 1
+      usuarioId: this.atendenteId
     };
 
     this.http.post(`${this.API_ATENDIMENTOS}/iniciar`, payload).subscribe({
@@ -221,11 +210,9 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
 
         this.chatSubscription = this.wsService.obterMensagens().subscribe({
           next: (novaMsg: MensagemChat) => {
-            
-            // 🚨 CORREÇÃO CIRÚRGICA: Se o cliente encerrou no totem, fecha o painel do atendente na hora!
             if (novaMsg.conteudoTexto === 'SESSAO_ENCERRADA_PELO_CLIENTE') {
               alert('O cliente encerrou o atendimento no totem.');
-              this.desconectarChatAtivo(); // Essa função sua já fecha o chat e limpa tudo localmente!
+              this.desconectarChatAtivo();
               return;
             }
 
@@ -233,7 +220,6 @@ export class AtendenteDashboardPage implements OnInit, OnDestroy {
           }
         });
 
-        // Remove da lista de pendentes visto que o atendimento iniciou
         this.chamados = this.chamados.filter(c => c.id !== chamadoId);
       },
       error: (err) => {
