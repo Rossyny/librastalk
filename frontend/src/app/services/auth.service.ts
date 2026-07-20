@@ -1,6 +1,7 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment'; // <-- IMPORTANTE: Importa o environment dinâmico
 
 // DTO para envio de dados ao Spring Boot
 export interface LoginDTO {
@@ -13,7 +14,7 @@ export interface UsuarioAutenticado {
   id: number;
   nome: string;
   email: string;
-  perfil: 'ADMINISTRADOR' | 'ATENDENTE' | 'ADMIN'; // Suporta variações do Enum Java
+  perfil: 'ADMINISTRADOR' | 'ATENDENTE' | 'ADMIN' | 'GERENTE'; // <-- Adicionado 'GERENTE' para bater com o banco!
   estabelecimentoId: number;
 }
 
@@ -22,7 +23,8 @@ export interface UsuarioAutenticado {
 })
 export class AuthService {
 
-  private readonly API_URL = 'http://localhost:8080/api/auth';
+  // Agora ele usa a URL configurada no environment.ts ou environment.prod.ts automaticamente!
+  private readonly API_URL = `${environment.apiUrl}/api/auth`;
 
   // WritableSignal para expor o usuário logado de forma reativa para todo o aplicativo
   public usuarioLogado: WritableSignal<UsuarioAutenticado | null> = signal(null);

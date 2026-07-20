@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'; // Garanta que o caminho até a pasta do environment está correto
 
 // Interfaces que tipam com segurança os dados trafegados
 export interface CadastroUsuarioDTO {
   nome: string;
   email: string;
   senha?: string;
-  perfil: 'ATENDENTE' | 'ADMINISTRADOR';
+  perfil: 'ATENDENTE' | 'ADMIN'; // Mantido estritamente alinhado com o Enum do Java
   estabelecimentoId: number;
 }
 
@@ -30,8 +31,8 @@ export interface GuicheResposta {
 })
 export class ApiService {
 
-  // URL base do seu Spring Boot local
-  private readonly API_URL = 'http://localhost:8080/api';
+  // URL dinâmica baseada no ambiente atual
+  private readonly API_URL = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 

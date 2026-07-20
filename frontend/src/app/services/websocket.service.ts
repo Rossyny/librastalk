@@ -1,6 +1,7 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { Subject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface MensagemChat {
   id?: number;
@@ -16,7 +17,12 @@ export interface MensagemChat {
 export class WebSocketService {
   
   private stompClient: Client | null = null;
-  private readonly WS_URL = 'ws://localhost:8080/ws-librastalk';
+  
+  // Lógica inteligente: se a API for https (produção), usa wss://. Se for http (local), usa ws://
+  private readonly WS_URL = environment.apiUrl.startsWith('https')
+    ? `${environment.apiUrl.replace('https://', 'wss://')}/ws-librastalk`
+    : `${environment.apiUrl.replace('http://', 'ws://')}/ws-librastalk`;
+
   private mensagemSubject = new Subject<MensagemChat>();
   public conectado: WritableSignal<boolean> = signal(false);
 

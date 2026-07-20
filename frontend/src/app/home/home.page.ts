@@ -14,6 +14,7 @@ import {
   desktopOutline, personAddOutline, hardwareChipOutline 
 } from 'ionicons/icons';
 import { ViewWillEnter } from '@ionic/angular';
+import { environment } from '../../environments/environment'; // <-- IMPORTANTE: Importa o ambiente dinâmico
 
 @Component({
   selector: 'app-home',
@@ -34,7 +35,8 @@ export class HomePage implements OnInit {
   totalAtendentes: number = 0;
   totalGuiches: number = 0;
 
-  private readonly API_BASE = 'http://localhost:8080/api';
+  // Agora ele chaveia automaticamente entre localhost em desenvolvimento e a URL da Render em produção!
+  private readonly API_BASE = `${environment.apiUrl}/api`;
 
   constructor(
     private router: Router,
@@ -252,6 +254,7 @@ export class HomePage implements OnInit {
   // NAVEGAÇÃO & UTILITÁRIOS
   // =========================================================================
   fazerLogout() {
+    localStorage.removeItem('librastalk_sessao'); // Ajustado para limpar a chave certa do seu AuthService
     localStorage.removeItem('usuarioLogado');
     localStorage.removeItem('token');
     this.router.navigate(['/login']);

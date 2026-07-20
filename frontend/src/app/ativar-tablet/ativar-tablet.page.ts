@@ -17,6 +17,7 @@ import { WebSocketService, MensagemChat } from '../services/websocket.service';
 import { Subscription } from 'rxjs';
 import { StompSubscription } from '@stomp/stompjs';
 import { VlibrasService } from '../services/vlibras.service';
+import { environment } from '../../environments/environment'; // <-- IMPORTANTE: Conexão com o ambiente dinâmico
 
 @Component({
   selector: 'app-ativar-tablet',
@@ -77,8 +78,9 @@ export class AtivarTabletPage implements OnInit, OnDestroy {
   private chatSubscription: Subscription | null = null;
   private statusSubscription: StompSubscription | null = null;
 
-  private readonly API_ATENDIMENTO_URL = 'http://localhost:8080/api/atendimentos';
-  private readonly API_BASE = 'http://localhost:8080/api';
+  // Substituído o texto estático de localhost pelas variáveis globais de ambiente
+  private readonly API_ATENDIMENTO_URL = `${environment.apiUrl}/api/atendimentos`;
+  private readonly API_BASE = `${environment.apiUrl}/api`;
 
   constructor(
     private router: Router, 
