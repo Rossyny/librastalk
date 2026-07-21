@@ -10,4 +10,6 @@ import java.util.List;
 public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> {
     List<Atendimento> findByGuicheIdAndStatus(Long guicheId, StatusAtendimento status);
     List<Atendimento> findByUsuarioIdAndStatus(Long usuarioId, StatusAtendimento status);
+
+    List<Atendimento> findByStatus(StatusAtendimento status);
 }
