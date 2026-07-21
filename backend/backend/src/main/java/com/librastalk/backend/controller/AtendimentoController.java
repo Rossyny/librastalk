@@ -29,22 +29,24 @@ public class AtendimentoController {
     private final ClienteRepository clienteRepository;
     private final AtendimentoRepository atendimentoRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    /**
-     * Endpoint para o Totem solicitar um atendimento (Entrar na fila de espera)
-     * URL: POST http://localhost:8080/api/atendimentos/solicitar
-     */
+    
     @PostMapping("/solicitar")
     @CrossOrigin(origins = "*")
     public ResponseEntity<?> solicitarAtendimento(@RequestBody Map<String, Object> dados) {
         try {
-            // Pega o ID do guichê enviado pelo tablet
             Long guicheId = ((Number) dados.get("guicheId")).longValue();
             
             System.out.println("===> Totem solicitando atendimento para o Guichê ID: " + guicheId);
 
-            // Chama o método correspondente no seu AtendimentoService para gerar a chamada na fila
-            // (Ajuste o nome do método caso no seu Service esteja diferente, ex: criarSolicitacao)
             Atendimento novoAtendimento = atendimentoService.criarSolicitacao(guicheId);
+
+            // ➕ NOTIFICA O PAINEL DO ATENDENTE VIA WEBSOCKET
+            try {
+                System.out.println("===> Disparando novo chamado no /topic/fila via WS...");
+                messagingTemplate.convertAndSend("/topic/fila", novoAtendimento);
+            } catch (Exception wsEx) {
+                System.err.println("⚠️ Falha ao notificar /topic/fila: " + wsEx.getMessage());
+            }
 
             System.out.println("===> Chamada criada com sucesso! ID Atendimento: " + novoAtendimento.getId());
             return ResponseEntity.ok(novoAtendimento);
@@ -137,6 +139,23 @@ public class AtendimentoController {
 
             return ResponseEntity.ok(atualizado);
         } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    /**
+     * 🔥 NOVO: Endpoint para listar todos os atendimentos pendentes (Fila de Espera)
+     * URL: GET http://localhost:8080/api/atendimentos/fila
+     */
+    @GetMapping("/fila")
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<?> listarFilaPendente() {
+        try {
+            // Busca no banco todos os atendimentos com status AGUARDANDO
+            java.util.List<Atendimento> fila = atendimentoRepository.findByStatus(StatusAtendimento.AGUARDANDO);
+            return ResponseEntity.ok(fila);
+        } catch (Exception e) {
+            System.err.println("❌ ERRO AO BUSCAR FILA: " + e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
